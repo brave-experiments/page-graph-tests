@@ -1,0 +1,25 @@
+<html>
+<head>
+	<title>Cross DOM Script Test</title>
+</head>
+<body>
+	<a href="./static_page.html">Click me!</a>
+
+	<script>
+
+	function child_func(msg) {
+		document.write(msg);
+	}
+
+	function call_parent_func() {
+		var parent_func = parent.parent_func;
+		if (parent_func)
+			parent_func("Hello from Child");
+		else
+			setTimeout(call_parent_func, 100);
+	}
+	call_parent_func();
+
+	</script>
+</body>
+</html>

@@ -1,0 +1,34 @@
+<html>
+<head>
+	<title>Cross DOM Script Test</title>
+</head>
+<body>
+	<iframe id="child_iframe"></iframe>
+	<h1 id=child_output></h1>
+	<iframe id="remote_frame" src="https://quanium.org"></iframe>
+
+	<script>
+
+	function parent_func(msg) {
+		document.getElementById("child_output").textContent = msg;
+	}
+
+	function call_child_func() {
+		var child_window =
+				document.getElementById("child_iframe").contentWindow;
+		var child_func = child_window.child_func;
+		if (child_func)
+			child_func("Hello world!");
+		else
+			setTimeout(call_child_func, 100);
+	}
+	//call_child_func();
+
+	document.getElementById("child_iframe").src = "./cross_dom_script_iframe.html";
+	setTimeout(function () {
+		document.getElementById("child_iframe").src = "https://quanium.org";
+	}, 5000);
+
+	</script>
+</body>
+</html>
