@@ -1,0 +1,17 @@
+<html>
+<head>
+	<title>Cross DOM Script Test</title>
+</head>
+<body>
+	<h1 id="title"></h1>
+	<p id="content"></p>
+
+	<script>
+		var identifier = "This is a testing script";
+		var title = document.getElementById("title");
+		var content = document.getElementById("content");
+		title.textContent = "Big Title";
+		content.textContent = "Lorem Ipsum";
+	</script>
+</body>
+</html>

@@ -50,7 +50,8 @@ def _dom_root_html(pg, dom_root):
 	ASSERT(pg.nodes(data=True)[root_html]["tag name"] == "html")
 	return root_html
 
-def _do_pg_enumerate_xpaths(pg, pg_node, parent_xpath, xpaths, cross_dom):
+def pg_enumerate_xpaths_with_action(pg, pg_node, parent_xpath,
+		action, cross_dom):
 	pg_nodes = pg.nodes(data=True)
 	current_xpath = parent_xpath + "/{0}".format(
 			pg_nodes[pg_node]["tag name"])
@@ -61,22 +62,26 @@ def _do_pg_enumerate_xpaths(pg, pg_node, parent_xpath, xpaths, cross_dom):
 		if not "tag name" in pg_nodes[pg_child]:
 			if cross_dom and "node type" in pg_nodes[pg_child] and \
 					pg_nodes[pg_child]["node type"] == "dom root":
-				_do_pg_enumerate_xpaths(pg, _dom_root_html(pg, pg_child),
-						current_xpath, xpaths, True)
+				pg_enumerate_xpaths_with_action(pg,
+						_dom_root_html(pg, pg_child),
+						current_xpath, action, True)
 			else:
 				continue
 		else:
-			_do_pg_enumerate_xpaths(pg, pg_child,
-					current_xpath, xpaths, cross_dom)
+			pg_enumerate_xpaths_with_action(pg, pg_child,
+					current_xpath, action, cross_dom)
 		is_leaf = False
 
 	if is_leaf:
-		xpaths.append(current_xpath)
+		action(current_xpath, pg_node)
 
 def pg_enumerate_xpaths(pg, top_dom_root, cross_dom=False):
 	xpaths = []
-	_do_pg_enumerate_xpaths(pg, _dom_root_html(pg, top_dom_root),
-			"", xpaths, cross_dom)
+	def action(xpath, pg_node):
+		xpaths.append(xpath)
+
+	pg_enumerate_xpaths_with_action(pg, _dom_root_html(pg, top_dom_root),
+			"", action, cross_dom)
 	xpaths.sort()
 	return xpaths
 
@@ -94,4 +99,15 @@ def pg_top_document_root(pg):
 
 	ASSERT(len(dom_roots) == 1)
 	return dom_roots.pop()
+
+def pg_find_node_by_xpath(pg, top_dom_root, xpath, cross_dom=False):
+	node = None
+	def action(p, pg_node):
+		nonlocal node
+		if p == xpath:
+			node = pg_node
+
+	pg_enumerate_xpaths_with_action(pg, _dom_root_html(pg, top_dom_root),
+			"", action, cross_dom)
+	return node
 
