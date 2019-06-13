@@ -111,3 +111,18 @@ def pg_find_node_by_xpath(pg, top_dom_root, xpath, cross_dom=False):
 			"", action, cross_dom)
 	return node
 
+def _do_pg_node_checks(pg, nodes, node_checks):
+	for node in nodes:
+		for check_name, e in node_checks.items():
+			if e[1]:
+				continue  # Already checked.
+			if e[0](pg.nodes(data=True)[node]):
+				e[1] = node
+				break
+
+def pg_node_check_successors(pg, pg_node, node_checks):
+	_do_pg_node_checks(pg, pg.successors(pg_node), node_checks)
+
+def pg_node_check_predecessors(pg, pg_node, node_checks):
+	_do_pg_node_checks(pg, pg.predecessors(pg_node), node_checks)
+

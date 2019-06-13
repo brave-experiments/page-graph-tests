@@ -1,17 +1,27 @@
 <html>
 <head>
-	<title>Cross DOM Script Test</title>
+	<title>Inline Script Test</title>
 </head>
 <body>
 	<h1 id="title"></h1>
 	<p id="content"></p>
 
-	<script>
+	<script id="singleton_script">
 		var identifier = "This is a testing script";
 		var title = document.getElementById("title");
 		var content = document.getElementById("content");
 		title.textContent = "Big Title";
 		content.textContent = "Lorem Ipsum";
+
+		var another_script =
+				"var title = document.getElementById('title');\n" +
+				"var content = document.getElementById('content');\n" +
+				"title.textContent = 'Another Title';\n"+
+				"content.textContent = 'Some more texts';"
+		setTimeout(function() {
+			document.getElementById("singleton_script").textContent =
+					another_script;
+		}, 3000);
 	</script>
 </body>
 </html>
