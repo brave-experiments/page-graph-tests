@@ -14,10 +14,10 @@ class TestStaticHTML(unittest.TestCase):
 
 		top_dom_root = pg_top_document_root(g)
 		pg_xpaths = pg_enumerate_xpaths(g, top_dom_root)
-		# print(pg_xpaths)
+		#print(pg_xpaths)
 
 		dom_xpaths = dom_enumerate_xpaths("static_page.html")
-		# print(dom_xpaths)
+		#print(dom_xpaths)
 
 		self.assertEqual(pg_xpaths, dom_xpaths)
 

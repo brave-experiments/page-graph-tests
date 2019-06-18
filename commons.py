@@ -116,7 +116,7 @@ def _do_pg_node_checks(pg, nodes, node_checks):
 		for check_name, e in node_checks.items():
 			if e[1]:
 				continue  # Already checked.
-			if e[0](pg.nodes(data=True)[node]):
+			if e[0](node):
 				e[1] = node
 				break
 
@@ -125,4 +125,29 @@ def pg_node_check_successors(pg, pg_node, node_checks):
 
 def pg_node_check_predecessors(pg, pg_node, node_checks):
 	_do_pg_node_checks(pg, pg.predecessors(pg_node), node_checks)
+
+def generate_script_text_selector(pg, search_text, exclude_text=None):
+	def selector_prototype(n):
+		pg_nodes = pg.nodes(data=True)
+		for adj in pg[n].keys():
+			if pg_nodes[adj]["node type"] == "text node":
+				text = pg_nodes[adj]["text"]
+				if text.find(search_text) != -1:
+					if exclude_text and text.find(exclude_text) != -1:
+						continue
+					return True
+		return False
+	return selector_prototype
+
+def pg_find_html_script_node(pg, selector):
+	script_nodes = []
+	for n, e in pg.nodes(data=True):
+		if e["node type"] == "html node" and e["tag name"] == "script":
+			script_nodes.append(n)
+
+	ret = []
+	for n in script_nodes:
+		if selector(n):
+			ret.append(n)
+	return ret
 

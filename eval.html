@@ -1,0 +1,18 @@
+<html>
+<head>
+	<title>Eval Test</title>
+</head>
+<body>
+	<h1 id="title"></h1>
+
+	<script>
+		eval("var script = document.createElement('script');\n" +
+				"script.id = 'test';\n" +
+				"script.innerHTML = \n" +
+				"\t\"var title = document.getElementById('title');\\n\" +\n" +
+				"\t\"title.textContent = 'Big Title';\"\n" +
+				"document.getElementsByTagName('body')[0].appendChild(script)");
+	</script>
+</body>
+</html>
+

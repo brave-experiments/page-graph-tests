@@ -26,9 +26,11 @@ class TestInlineScript(unittest.TestCase):
 		predecessors = list(g.predecessors(html_script_node))
 		self.assertEqual(len(predecessors), 2)
 		html_script_node_checks = {
-				"parser": [lambda x: x["node type"] == "parser", None],
-				"body": [lambda x: x["node type"] == "html node" and \
-						x["tag name"] == "body", None],
+				"parser": [lambda x:
+					g_nodes[x]["node type"] == "parser", None],
+				"body": [lambda x:
+					g_nodes[x]["node type"] == "html node" and \
+					g_nodes[x]["tag name"] == "body", None],
 			}
 		pg_node_check_predecessors(g,
 				html_script_node, html_script_node_checks)
@@ -38,8 +40,10 @@ class TestInlineScript(unittest.TestCase):
 		# Check successors of |html_script_node|.
 		self.assertEqual(len(g[html_script_node]), 2)
 		html_script_node_checks = {
-				"text node": [lambda x: x["node type"] == "text node", None],
-				"script": [lambda x: x["node type"] == "script", None],
+				"text node": [lambda x:
+					g_nodes[x]["node type"] == "text node", None],
+				"script": [lambda x:
+					g_nodes[x]["node type"] == "script", None],
 			}
 		pg_node_check_successors(g, html_script_node, html_script_node_checks)
 		script_text_node = html_script_node_checks["text node"][1]
@@ -54,8 +58,9 @@ class TestInlineScript(unittest.TestCase):
 		# Check the successors of |script_node|.
 		self.assertEqual(len(g[script_node]), 2)
 		script_node_checks = {
-				"heading": [lambda x: x["text"] == "Big Title", None],
-				"content": [lambda x: x["text"] == "Lorem Ipsum", None],
+				"heading": [lambda x: g_nodes[x]["text"] == "Big Title", None],
+				"content": [lambda x:
+					g_nodes[x]["text"] == "Lorem Ipsum", None],
 			}
 		pg_node_check_successors(g, script_node, script_node_checks)
 		heading_node = script_node_checks["heading"][1]

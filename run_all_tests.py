@@ -5,7 +5,12 @@ import sys
 import subprocess
 
 if __name__ == "__main__":
-	all_tests = ["cross_dom_script.html", "script_modify.html"]
+	all_tests = [
+			"static_page.html",
+			"cross_dom_script.html",
+			"script_modify.html",
+			"eval.html",
+		]
 
 	parser = argparse.ArgumentParser()
 	parser.add_argument("--brave-bin-path", "-p", type=str,
