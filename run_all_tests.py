@@ -10,6 +10,7 @@ if __name__ == "__main__":
 			"cross_dom_script.html",
 			"script_modify.html",
 			"eval.html",
+			"iframe_local_remote.html",
 		]
 
 	parser = argparse.ArgumentParser()

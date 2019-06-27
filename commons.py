@@ -61,9 +61,12 @@ def pg_enumerate_xpaths_with_action(pg, pg_node, parent_xpath,
 	for pg_child in pg_children:
 		if not "tag name" in pg_nodes[pg_child]:
 			if cross_dom and "node type" in pg_nodes[pg_child] and \
-					pg_nodes[pg_child]["node type"] == "dom root":
+					pg_nodes[pg_child]["node type"] == "local frame":
+				pg_grandchildren = list(pg[pg_child].keys())
+				ASSERT(len(pg_grandchildren) == 1)
+				# pg_grandchildren[0] is the dom root node.
 				pg_enumerate_xpaths_with_action(pg,
-						_dom_root_html(pg, pg_child),
+						_dom_root_html(pg, pg_grandchildren[0]),
 						current_xpath, action, True)
 			else:
 				continue
@@ -126,8 +129,8 @@ def pg_node_check_successors(pg, pg_node, node_checks):
 def pg_node_check_predecessors(pg, pg_node, node_checks):
 	_do_pg_node_checks(pg, pg.predecessors(pg_node), node_checks)
 
-def generate_script_text_selector(pg, search_text, exclude_text=None):
-	def selector_prototype(n):
+def generate_script_text_selector(search_text, exclude_text=None):
+	def selector_prototype(pg, n):
 		pg_nodes = pg.nodes(data=True)
 		for adj in pg[n].keys():
 			if pg_nodes[adj]["node type"] == "text node":
@@ -139,15 +142,27 @@ def generate_script_text_selector(pg, search_text, exclude_text=None):
 		return False
 	return selector_prototype
 
-def pg_find_html_script_node(pg, selector):
+# TODO: Also account for attribute deletion.
+def generate_html_element_id_selector(node_id):
+	def selector_prototype(pg, n):
+		for p in pg.predecessors(n):
+			for e, d in pg[p][n].items():
+				if d["edge type"] == "attr set" and \
+						"key" in d and d["key"] == "id" and \
+						"value" in d and d["value"] == node_id:
+					return True
+		return False
+	return selector_prototype
+
+def pg_find_html_element_node(pg, tag_name, selector):
 	script_nodes = []
 	for n, e in pg.nodes(data=True):
-		if e["node type"] == "html node" and e["tag name"] == "script":
+		if e["node type"] == "html node" and e["tag name"] == tag_name:
 			script_nodes.append(n)
 
 	ret = []
 	for n in script_nodes:
-		if selector(n):
+		if selector(pg, n):
 			ret.append(n)
 	return ret
 

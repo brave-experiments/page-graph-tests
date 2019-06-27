@@ -7,7 +7,7 @@ from networkx import graphml
 from commons import ASSERT
 from commons import pg_node_check_predecessors
 from commons import pg_node_check_successors
-from commons import pg_find_html_script_node
+from commons import pg_find_html_element_node
 from commons import generate_script_text_selector
 
 class TestEval(unittest.TestCase):
@@ -15,13 +15,13 @@ class TestEval(unittest.TestCase):
 		g = graphml.read_graphml("/tmp/pagegraph.log")
 		g_nodes = g.nodes(data=True)
 
-		script_nodes = pg_find_html_script_node(
-				g, generate_script_text_selector(g, "eval(\"var script = "))
+		script_nodes = pg_find_html_element_node(g, "script",
+				generate_script_text_selector("eval(\"var script = "))
 		self.assertEqual(len(script_nodes), 1)
 		html_script_node = script_nodes[0]
 
-		script_nodes = pg_find_html_script_node(
-				g, generate_script_text_selector(g,
+		script_nodes = pg_find_html_element_node(g, "script",
+				generate_script_text_selector(
 					"var title = document.getElementById",
 					exclude_text="eval"))
 		self.assertEqual(len(script_nodes), 1)
