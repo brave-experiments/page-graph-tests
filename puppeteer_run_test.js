@@ -1,5 +1,6 @@
 const p = require("puppeteer");
 const child_process = require("child_process");
+const fs = require("fs");
 
 if (process.argv.length != 4) {
 	console.log("[-]: Wrong number of arguments");
@@ -13,14 +14,21 @@ const base_target = target.split(".").slice(0, -1).join(".");
 p.launch({
 		//headless: false,
 		executablePath: brave_bin_path,
-		//dumpio: true,
+		dumpio: true,
 		args: ["--no-sandbox"]}).then(async browser => {
+
+	// Visit test page.
 	const page = await browser.newPage();
 	await page.goto("http://localhost:8000/" + target);
-	child_process.execSync("kill -30 -" + browser.process().pid);
-	child_process.execSync("sleep 5");  // Give enough time for the PG dump.
+
+	// Dump the PG.
+	const client = await page.target().createCDPSession();
+	const rep = await client.send("Page.generatePageGraph");
+	await fs.promises.writeFile("/tmp/pagegraph.log", rep.data);
+
 	await browser.close();
 
+	// Run unittest.
 	child_process.execSync("./" + base_target + ".py");
 });
 

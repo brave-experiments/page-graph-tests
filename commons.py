@@ -166,3 +166,10 @@ def pg_find_html_element_node(pg, tag_name, selector):
 			ret.append(n)
 	return ret
 
+def pg_node_id_mapping(pg):
+	ret = {}
+	for n, e in pg.nodes(data=True):
+		if "node id" in e:
+			ret[e["node id"]] = n
+	return ret
+

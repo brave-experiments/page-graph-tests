@@ -5,6 +5,7 @@ import unittest
 from networkx import graphml
 
 from commons import ASSERT
+from commons import pg_node_id_mapping
 from commons import pg_node_check_predecessors
 from commons import pg_node_check_successors
 from commons import pg_find_html_element_node
@@ -14,6 +15,7 @@ class TestEval(unittest.TestCase):
 	def test_eval(self):
 		g = graphml.read_graphml("/tmp/pagegraph.log")
 		g_nodes = g.nodes(data=True)
+		id_mapping = pg_node_id_mapping(g)
 
 		script_nodes = pg_find_html_element_node(g, "script",
 				generate_script_text_selector("eval(\"var script = "))
@@ -58,9 +60,15 @@ class TestEval(unittest.TestCase):
 						break
 				insert_edges = []
 				for e, d in g[pn][eval_script_text_node].items():
-					if d["edge type"] == "insert" and \
-							d["parent"] != (1 << 31) - 1:
-						insert_edges.append(e)
+					if d["edge type"] != "insert":
+						continue
+					parent_id = d["parent"]
+					self.assertTrue(parent_id in id_mapping)
+					p = id_mapping[parent_id]
+					if g_nodes[p]["node type"] == "html node" and \
+							g_nodes[p]["tag name"] == "#document-fragment":
+						continue
+					insert_edges.append(e)
 				if len(insert_edges) == 1:
 					return True
 			return False
