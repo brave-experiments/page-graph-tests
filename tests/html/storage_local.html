@@ -1,0 +1,15 @@
+<html>
+  <head>
+    <title>Testing area for localStorage</title>
+  </head>
+
+  <body>
+    <script>
+      localStorage.setItem('myCat', 'Tom');
+      localStorage.setItem('myMouse', 'Jerry');
+      let cat = localStorage.getItem('myCat');
+      localStorage.removeItem('myCat');
+      localStorage.clear();
+    </script>
+  </body>
+</html>
