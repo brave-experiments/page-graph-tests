@@ -14,8 +14,9 @@ const base_target = target.split(".").slice(0, -1).join(".");
 p.launch({
 		//headless: false,
 		executablePath: brave_bin_path,
-		dumpio: true,
-		args: ["--no-sandbox"]}).then(async browser => {
+		//dumpio: true,
+		args: ["--no-sandbox",
+			"--enable-logging=/dev/null"]}).then(async browser => {
 
 	// Visit test page.
 	const page = await browser.newPage();

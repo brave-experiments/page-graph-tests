@@ -4,7 +4,23 @@
 </head>
 <body>
 	<iframe id="local_iframe" src="./static_page.html"></iframe>
-	<iframe id="remote_iframe"
-			src="https://www.google.com/webhp?igu=1"></iframe>
+	<iframe id="remote_iframe" src="https://quanium.org"></iframe>
+	<!--<iframe id="remote_iframe"
+			src="https://www.google.com/webhp?igu=1"></iframe>-->
+
+	<br/>
+	<p id="output"></p>
+
+	<script>
+	setTimeout(function() {
+		var p = document.getElementById("output");
+		try {
+			var w = document.getElementById("remote_iframe").contentWindow;
+			p.textContent = w.document.readyState;
+		} catch (e) {
+			p.textContent = e.toString();
+		}
+	}, 3000);
+	</script>
 </body>
 </html>
