@@ -42,7 +42,7 @@ colorama.init()
 # Configure chromewhip logging.
 logging.getLogger('chromewhip.chrome.Chrome').setLevel(logging.ERROR)
 
-async def run_tests(brave_exe_path, test_name_filters=['*']):
+async def run_tests(brave_exe_path, test_name_filters=['*'], headless=True):
     # Start web server hosting the test HTML content.
 
     app = web.Application()
@@ -74,7 +74,7 @@ async def run_tests(brave_exe_path, test_name_filters=['*']):
                 continue
 
             total_tests += 1
-            passed_tests += await run_test(test_name, brave_exe_path)
+            passed_tests += await run_test(test_name, brave_exe_path, headless=headless)
 
     # Stop web server.
     await runner.cleanup()
@@ -83,7 +83,7 @@ async def run_tests(brave_exe_path, test_name_filters=['*']):
     if passed_tests != total_tests:
         sys.exit(1)
 
-async def run_test(test_name, brave_exe_path):
+async def run_test(test_name, brave_exe_path, headless=True):
     print(Fore.CYAN + 'Running test: ' + Fore.RESET + test_name)
 
     test_page_file_name = test_name + '.html'
@@ -117,7 +117,6 @@ async def run_test(test_name, brave_exe_path):
             '--enable-automation',
             '--password-store=basic',
             '--use-mock-keychain',
-            '--headless',
             '--hide-scrollbars',
             '--mute-audio',
             'about:blank',
@@ -128,6 +127,9 @@ async def run_test(test_name, brave_exe_path):
             '--disable-brave-update',
             '--enable-logging=stderr',
         ]
+
+        if headless:
+            brave_args.append('--headless')
 
         proc = await asyncio.create_subprocess_exec(
             brave_exe_path,
@@ -272,9 +274,16 @@ if __name__ == '__main__':
         metavar='FILTER',
         nargs='+',
         dest='filters',
-        help='run only tests with names matching one of these glob-style filters',
         default='*',
+        help='run only tests with names matching one of these glob-style filters',
+    )
+    parser.add_argument(
+        '--no-headless',
+        dest='headless',
+        action='store_false',
+        default=True,
+        help='disable headless mode browser execution',
     )
 
     args = parser.parse_args()
-    asyncio.run(run_tests(args.brave, test_name_filters=args.filters))
+    asyncio.run(run_tests(args.brave, test_name_filters=args.filters, headless=args.headless))

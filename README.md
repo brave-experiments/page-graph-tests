@@ -16,6 +16,12 @@ To run all tests:
 poetry run python test_runner.py <path to Brave>
 ```
 
+To run all tests, in non-headless mode:
+
+```
+poetry run python test_runner.py <path to Brave> --no-headless
+```
+
 To run only a specific test:
 
 ```
