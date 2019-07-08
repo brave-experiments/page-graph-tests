@@ -10,6 +10,8 @@
 
 ## Running Tests
 
+To run all tests:
+
 ```
 poetry run python test_runner.py <path to Brave>
 ```
