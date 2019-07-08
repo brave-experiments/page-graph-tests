@@ -6,6 +6,7 @@
 
 import argparse
 import asyncio
+import fnmatch
 import importlib.util
 import logging
 import os
@@ -41,7 +42,7 @@ colorama.init()
 # Configure chromewhip logging.
 logging.getLogger('chromewhip.chrome.Chrome').setLevel(logging.ERROR)
 
-async def run_tests(brave_exe_path):
+async def run_tests(brave_exe_path, test_name_filters=['*']):
     # Start web server hosting the test HTML content.
 
     app = web.Application()
@@ -63,6 +64,15 @@ async def run_tests(brave_exe_path):
             test_name, file_ext = os.path.splitext(test_script_file_path)
             if file_ext != '.py':
                 continue
+
+            test_name_matched = False
+            for test_name_filter in test_name_filters:
+                if fnmatch.fnmatch(test_name, test_name_filter):
+                    test_name_matched = True
+                    break
+            if not test_name_matched:
+                continue
+
             total_tests += 1
             passed_tests += await run_test(test_name, brave_exe_path)
 
@@ -257,6 +267,14 @@ if __name__ == '__main__':
     parser.add_argument(
         'brave', metavar='BRAVE', help='path to a Page Graph-enabled Brave browser executable'
     )
+    parser.add_argument(
+        '--filter',
+        metavar='FILTER',
+        nargs='+',
+        dest='filters',
+        help='run only tests with names matching one of these glob-style filters',
+        default='*',
+    )
 
     args = parser.parse_args()
-    asyncio.run(run_tests(args.brave))
+    asyncio.run(run_tests(args.brave, test_name_filters=args.filters))

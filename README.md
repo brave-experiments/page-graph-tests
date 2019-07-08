@@ -14,6 +14,19 @@
 poetry run python test_runner.py <path to Brave>
 ```
 
+To run only a specific test:
+
+```
+poetry run python test_runner.py <path to Brave> --filter static_page
+```
+
+To run only tests matching one of a set of
+[glob-style](https://en.wikipedia.org/wiki/Glob_(programming)) filters:
+
+```
+poetry run python test_runner.py <path to Brave> --filter 'static_*' 'cross_dom_*'
+```
+
 ## Adding Tests
 
 1. Drop your HTML/JS/CSS file(s) in `tests/html/`.
