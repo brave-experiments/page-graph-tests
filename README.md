@@ -73,4 +73,4 @@ Helpful resources:
 ### Contribution
 
 Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in
-these works by you shall be licensed as above, without any additional terms or conditions.
+this work by you shall be licensed as above, without any additional terms or conditions.
