@@ -238,13 +238,22 @@ async def run_test(test_name, brave_exe_path, headless=True):
                 print('...' + Fore.GREEN + 'OK' + Fore.RESET)
 
             # Close all tabs and terminate the browser instance.
-
             for tab in browser.tabs:
                 await browser.close_tab(tab)
-
-            proc.stdout._transport.close()
-            await collect_browser_output_task
         finally:
+            try:
+                proc.stdout._transport.close()
+                await collect_browser_output_task
+            except BaseException:
+                # Output collection failed.
+                pass
+
+            if not test_succeeded:
+                print()
+                print(Fore.MAGENTA + 'Browser Log:' + Fore.RESET)
+                print(browser_output)
+                print()
+
             try:
                 proc.terminate()
             except ProcessLookupError:
@@ -255,12 +264,6 @@ async def run_test(test_name, brave_exe_path, headless=True):
                 await asyncio.wait_for(proc.wait(), timeout=process_termination_timeout)
             except asyncio.TimeoutError:
                 proc.kill()
-
-            if not test_succeeded:
-                print()
-                print(Fore.MAGENTA + 'Browser Log:' + Fore.RESET)
-                print(browser_output)
-                print()
 
         return test_succeeded
 
