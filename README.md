@@ -44,12 +44,16 @@ poetry run python test_runner.py <path to Brave> --filter 'static_*' 'cross_dom_
 ## Code Formatting
 
 Python code in this repository is auto-formatted with the
-[Lavender](https://pypi.org/project/lavender/) code formatter. After the [initial setup](#setup),
-you can auto-format all Python source files in the repository by running:
+[Lavender](https://pypi.org/project/lavender/) code formatter.
+
+After the [initial setup](#setup), you can auto-format all Python source files in the repository by
+running:
 
 ```
 poetry run lavender .
 ```
+
+Please do so before submitting changes.
 
 ## License
 
