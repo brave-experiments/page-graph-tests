@@ -33,6 +33,8 @@ web_server_port = 8080
 web_server_uri_prefix = 'http://{}:{}/'.format(web_server_host, web_server_port)
 
 root_dir_path = os.path.dirname(os.path.realpath(__file__))
+graphml_dir_path = os.path.join(root_dir_path, 'graphml')
+logs_dir_path = os.path.join(root_dir_path, 'logs')
 tests_dir_path = os.path.join(root_dir_path, 'tests')
 test_html_dir_path = os.path.join(tests_dir_path, 'html')
 test_scripts_dir_path = os.path.join(tests_dir_path, 'scripts')
@@ -140,6 +142,7 @@ async def run_test(test_name, brave_exe_path, headless=True):
         )
 
         test_succeeded = False
+        page_graph_data = None
 
         try:
             browser_output = ''
@@ -223,15 +226,11 @@ async def run_test(test_name, brave_exe_path, headless=True):
                 test_module.test(page_graph, test_page_html, tab)
             except AssertionError as e:
                 print('...' + Fore.RED + 'FAIL' + Fore.RESET)
-                print()
                 print(Fore.MAGENTA + 'Test Error:' + Fore.RESET)
-                print()
                 traceback.print_exc(limit=-1)
             except BaseException as e:
                 print('...' + Fore.YELLOW + 'ERROR' + Fore.RESET)
-                print()
                 print(Fore.MAGENTA + 'Test Error:' + Fore.RESET)
-                print()
                 traceback.print_exc()
             else:
                 test_succeeded = True
@@ -249,10 +248,22 @@ async def run_test(test_name, brave_exe_path, headless=True):
                 pass
 
             if not test_succeeded:
-                print()
+                log_file_path = os.path.join(logs_dir_path, test_name + '.log')
+                os.makedirs(os.path.dirname(log_file_path), exist_ok=True)
+                async with aiofiles.open(log_file_path, 'w', encoding='utf-8') as log_file:
+                    await log_file.write(browser_output)
+
                 print(Fore.MAGENTA + 'Browser Log:' + Fore.RESET)
-                print(browser_output)
-                print()
+                print('Dumped to ' + log_file_path)
+
+                if page_graph_data is not None:
+                    graphml_file_path = os.path.join(graphml_dir_path, test_name + '.graphml')
+                    os.makedirs(os.path.dirname(graphml_file_path), exist_ok=True)
+                    async with aiofiles.open(graphml_file_path, 'w', encoding='utf-8') as graphml_file:
+                        await graphml_file.write(page_graph_data)
+
+                    print(Fore.MAGENTA + 'Page Graph Data:' + Fore.RESET)
+                    print('Dumped to ' + graphml_file_path)
 
             try:
                 proc.terminate()
