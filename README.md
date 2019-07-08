@@ -32,7 +32,7 @@ poetry run python test_runner.py <path to Brave> --filter 'static_*' 'cross_dom_
 ## Adding Tests
 
 1. Drop your HTML/JS/CSS file(s) in `tests/html/`.
-1. Write a test script in `tests/scripts/`. See `static_page.py` for a simple example.
+1. Write a Python test script in `tests/scripts/`. See `static_page.py` for a simple example.
 
 ## Code Formatting
 
