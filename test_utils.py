@@ -176,3 +176,21 @@ def pg_node_id_mapping(pg):
         if 'node id' in e:
             ret[e['node id']] = n
     return ret
+
+# storage_node is either "cookie jar", "local storage" or "session storage"
+def pg_find_storage_node(pg, storage_node):
+    for n, e in pg.nodes(data=True):
+        if e['node type'] == storage_node:
+            return n
+
+    return undefined
+
+
+# returns all data on edges from from_node to to_node
+def pg_edges_data_from_to(pg, from_node, to_node):
+    data_from = []
+    for from_n, to_n, data in pg.edges(data=True):
+        if from_n == from_node and to_n == to_node:
+            data_from.append(data)
+
+    return data_from

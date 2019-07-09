@@ -259,7 +259,9 @@ async def run_test(test_name, brave_exe_path, headless=True):
                 if page_graph_data is not None:
                     graphml_file_path = os.path.join(graphml_dir_path, test_name + '.graphml')
                     os.makedirs(os.path.dirname(graphml_file_path), exist_ok=True)
-                    async with aiofiles.open(graphml_file_path, 'w', encoding='utf-8') as graphml_file:
+                    async with aiofiles.open(
+                        graphml_file_path, 'w', encoding='utf-8'
+                    ) as graphml_file:
                         await graphml_file.write(page_graph_data)
 
                     print(Fore.MAGENTA + 'Page Graph Data:' + Fore.RESET)
