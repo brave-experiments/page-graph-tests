@@ -57,7 +57,7 @@ Please do so before submitting changes.
 
 ## License
 
-Copyright (C) 2019 [Brave Software, Inc](https://brave.com/)
+Copyright (C) 2019 The Brave Software Team
 
 This program is free software: you can redistribute it and/or modify it under the terms of the
 Mozilla Public License, version 2.0.

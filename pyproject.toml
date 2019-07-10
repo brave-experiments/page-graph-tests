@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "Automated test suite for Brave Page Graph"
 authors = [
   "Quan Chen <mail@quanium.org>",
+  "Alexander Sjösten <sjosten@chalmers.se>",
   "Michael Smith <michael@spinda.net>"
 ]
 license = "MPL-2.0"
