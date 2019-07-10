@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
 
-import unittest
-
-from networkx import graphml
-
 from test_utils import (
     pg_top_document_root,
     pg_find_html_element_node,
