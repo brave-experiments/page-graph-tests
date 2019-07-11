@@ -9,12 +9,10 @@ from test_utils import (
     pg_find_html_element_node,
     generate_script_text_selector,
     pg_edges_data_from_to,
+    pg_nodes_directly_reachable_from,
 )
 
 def test(page_graph, html, tab):
-    screen_node = pg_find_static_node(page_graph, 'Screen')
-    assert screen_node != None
-
     script_nodes = pg_find_html_element_node(
         page_graph, 'script', generate_script_text_selector('screen.')
     )
@@ -25,38 +23,40 @@ def test(page_graph, html, tab):
     assert len(successors) == 2  # since we are an inline script tag
 
     executing_node = successors[1]
-    edges_script_to_screen = pg_edges_data_from_to(page_graph, executing_node, screen_node)
-    assert len(edges_script_to_screen) == 8
-
-    edges_screen_to_script = pg_edges_data_from_to(page_graph, screen_node, executing_node)
-    assert len(edges_screen_to_script) == 8
-
-    # all outgoing edges should look the same aside from the function
-    # called, and since the argument list is empty, it won't be a key
-    # in edges_script_to_screen
-    called_screen_functions = [
-        'availWidth',
-        'availHeight',
-        'width',
-        'height',
-        'colorDepth',
-        'pixelDepth',
-        'availLeft',
-        'availTop',
+    # check so all the nodes directly reachable from the script goes to different screen nodes
+    all_screen_nodes = pg_nodes_directly_reachable_from(page_graph, executing_node)
+    assert len(all_screen_nodes) == 8
+    node_order = [
+        'Screen.availWidth',
+        'Screen.availHeight',
+        'Screen.width',
+        'Screen.height',
+        'Screen.colorDepth',
+        'Screen.pixelDepth',
+        'Screen.availLeft',
+        'Screen.availTop',
     ]
-    for i in range(0, len(edges_script_to_screen)):
-        assert edges_script_to_screen[i]['edge type'] == 'webapi call'
-        assert edges_script_to_screen[i]['key'] == called_screen_functions[i]
-        try:
-            edges_script_to_screen[i]['args']
-            assert False
-        except KeyError:
-            assert True
 
-    # all result edges should look the same aside from the function
-    # called and the actual result.
+    # check the call edges
+    for i in range(0, len(all_screen_nodes)):
+        edges = pg_edges_data_from_to(page_graph, executing_node, all_screen_nodes[i])
+        # should only be one call edge to each screen node
+        assert len(edges) == 1
+        edge = edges[0]
+        # should be exactly 2 keys since there's no arguments
+        assert len(edge) == 2
+        assert edge['edge type'] == 'webapi call'
+        assert edge['key'] == node_order[i]
+
+    # check the result edges
     expected_results = ['1680', '947', '1680', '1050', '24', '24', '0', '23']
-    for i in range(0, len(edges_screen_to_script)):
-        assert edges_screen_to_script[i]['edge type'] == 'webapi result'
-        assert edges_screen_to_script[i]['key'] == called_screen_functions[i]
-        assert edges_screen_to_script[i]['value'] == expected_results[i]
+    for i in range(0, len(all_screen_nodes)):
+        edges = pg_edges_data_from_to(page_graph, all_screen_nodes[i], executing_node)
+        # should only be one result edge from each screen node
+        assert len(edges) == 1
+        edge = edges[0]
+        # should be exactly 3 keys (type, key and value)
+        assert len(edge) == 3
+        assert edge['edge type'] == 'webapi result'
+        assert edge['key'] == node_order[i]
+        assert edge['value'] == expected_results[i]

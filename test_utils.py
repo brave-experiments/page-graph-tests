@@ -195,3 +195,23 @@ def pg_edges_data_from_to(pg, from_node, to_node):
             data_from.append(data)
 
     return data_from
+
+def pg_nodes_directly_reachable_from(pg, from_node):
+    nodes = []
+    for from_n, to_n, _data in pg.edges(data=True):
+        if from_n == from_node:
+            nodes.append(to_n)
+
+    return nodes
+
+def pg_nodes_directly_reachable_from_with_edge_type(pg, from_node, edge_type):
+    nodes = []
+    for from_n, to_n, data in pg.edges(data=True):
+        if from_n == from_node and data['edge type'] == edge_type:
+            nodes.append(to_n)
+
+    return nodes
+
+
+def pg_get_node_data(pg, node):
+    return pg.nodes[node]

@@ -9,12 +9,10 @@ from test_utils import (
     pg_find_html_element_node,
     generate_script_text_selector,
     pg_edges_data_from_to,
+    pg_nodes_directly_reachable_from,
 )
 
 def test(page_graph, html, tab):
-    webgl_node = pg_find_static_node(page_graph, 'WebGL')
-    assert webgl_node != None
-
     script_nodes = pg_find_html_element_node(
         page_graph, 'script', generate_script_text_selector('webgl')
     )
@@ -27,16 +25,57 @@ def test(page_graph, html, tab):
     assert len(successors) == 2  # since we are an inline script tag
 
     executing_node = successors[1]
-    edges_script_to_webgl = pg_edges_data_from_to(page_graph, executing_node, webgl_node)
-    # we make 28 calls to webgl in total (26 to getParameter, 2 to getExtension, and 36 to getContextAttributes)
-    assert len(edges_script_to_webgl) == 64
+    all_webgl_nodes = pg_nodes_directly_reachable_from(page_graph, executing_node)
+    all_nodes_unique = sorted(set(all_webgl_nodes))
+    # length should be 3 (we call 3 different webgl functions)
+    assert len(set(all_nodes_unique)) == 3
 
-    # result edges...
-    edges_webgl_to_script = pg_edges_data_from_to(page_graph, webgl_node, executing_node)
-    assert len(edges_webgl_to_script) == 64
+    node_order = [
+        'WebGLRenderingContext.getShaderPrecisionFormat',
+        'WebGLRenderingContext.getParameter',
+        'WebGLRenderingContext.getExtension',
+    ]
 
-    # check edges script --> webgl node
-    function_args = [
+    shader_args = [
+        'gl.VERTEX_SHADER, gl.HIGH_FLOAT',
+        'gl.VERTEX_SHADER, gl.HIGH_FLOAT',
+        'gl.VERTEX_SHADER, gl.HIGH_FLOAT',
+        'gl.VERTEX_SHADER, gl.MEDIUM_FLOAT',
+        'gl.VERTEX_SHADER, gl.MEDIUM_FLOAT',
+        'gl.VERTEX_SHADER, gl.MEDIUM_FLOAT',
+        'gl.VERTEX_SHADER, gl.LOW_FLOAT',
+        'gl.VERTEX_SHADER, gl.LOW_FLOAT',
+        'gl.VERTEX_SHADER, gl.LOW_FLOAT',
+        'gl.FRAGMENT_SHADER, gl.HIGH_FLOAT',
+        'gl.FRAGMENT_SHADER, gl.HIGH_FLOAT',
+        'gl.FRAGMENT_SHADER, gl.HIGH_FLOAT',
+        'gl.FRAGMENT_SHADER, gl.MEDIUM_FLOAT',
+        'gl.FRAGMENT_SHADER, gl.MEDIUM_FLOAT',
+        'gl.FRAGMENT_SHADER, gl.MEDIUM_FLOAT',
+        'gl.FRAGMENT_SHADER, gl.LOW_FLOAT',
+        'gl.FRAGMENT_SHADER, gl.LOW_FLOAT',
+        'gl.FRAGMENT_SHADER, gl.LOW_FLOAT',
+        'gl.VERTEX_SHADER, gl.HIGH_INT',
+        'gl.VERTEX_SHADER, gl.HIGH_INT',
+        'gl.VERTEX_SHADER, gl.HIGH_INT',
+        'gl.VERTEX_SHADER, gl.MEDIUM_INT',
+        'gl.VERTEX_SHADER, gl.MEDIUM_INT',
+        'gl.VERTEX_SHADER, gl.MEDIUM_INT',
+        'gl.VERTEX_SHADER, gl.LOW_INT',
+        'gl.VERTEX_SHADER, gl.LOW_INT',
+        'gl.VERTEX_SHADER, gl.LOW_INT',
+        'gl.FRAGMENT_SHADER, gl.HIGH_INT',
+        'gl.FRAGMENT_SHADER, gl.HIGH_INT',
+        'gl.FRAGMENT_SHADER, gl.HIGH_INT',
+        'gl.FRAGMENT_SHADER, gl.MEDIUM_INT',
+        'gl.FRAGMENT_SHADER, gl.MEDIUM_INT',
+        'gl.FRAGMENT_SHADER, gl.MEDIUM_INT',
+        'gl.FRAGMENT_SHADER, gl.LOW_INT',
+        'gl.FRAGMENT_SHADER, gl.LOW_INT',
+        'gl.FRAGMENT_SHADER, gl.LOW_INT',
+    ]
+
+    get_parameter_args = [
         'gl.ALIASED_LINE_WIDTH_RANGE',
         'gl.ALIASED_POINT_SIZE_RANGE',
         'gl.ALPHA_BITS',
@@ -60,62 +99,79 @@ def test(page_graph, html, tab):
         'gl.STENCIL_BITS',
         'gl.VENDOR',
         'gl.VERSION',
-        'WEBGL_debug_renderer_info',
         'ext.UNMASKED_VENDOR_WEBGL',
         'ext.UNMASKED_RENDERER_WEBGL',
-        'EXT_texture_filter_anisotropic',
         'ext.MAX_TEXTURE_MAX_ANISOTROPY_EXT',
-        'gl.VERTEX_SHADER, gl.HIGH_FLOAT',
-        'gl.VERTEX_SHADER, gl.HIGH_FLOAT',
-        'gl.VERTEX_SHADER, gl.HIGH_FLOAT',
-        'gl.VERTEX_SHADER, gl.MEDIUM_FLOAT',
-        'gl.VERTEX_SHADER, gl.MEDIUM_FLOAT',
-        'gl.VERTEX_SHADER, gl.MEDIUM_FLOAT',
-        'gl.VERTEX_SHADER, gl.LOW_FLOAT',
-        'gl.VERTEX_SHADER, gl.LOW_FLOAT',
-        'gl.VERTEX_SHADER, gl.LOW_FLOAT',
-        'gl.FRAGMENT_SHADER, gl.HIGH_FLOAT',
-        'gl.FRAGMENT_SHADER, gl.HIGH_FLOAT',
-        'gl.FRAGMENT_SHADER, gl.HIGH_FLOAT',
-        'gl.FRAGMENT_SHADER, gl.MEDIUM_FLOAT',
-        'gl.FRAGMENT_SHADER, gl.MEDIUM_FLOAT',
-        'gl.FRAGMENT_SHADER, gl.MEDIUM_FLOAT',
-        'gl.FRAGMENT_SHADER, gl.LOW_FLOAT',
-        'gl.FRAGMENT_SHADER, gl.LOW_FLOAT',
-        'gl.FRAGMENT_SHADER, gl.LOW_FLOAT',
-        'gl.VERTEX_SHADER, gl.HIGH_INT',
-        'gl.VERTEX_SHADER, gl.HIGH_INT',
-        'gl.VERTEX_SHADER, gl.HIGH_INT',
-        'gl.VERTEX_SHADER, gl.MEDIUM_INT',
-        'gl.VERTEX_SHADER, gl.MEDIUM_INT',
-        'gl.VERTEX_SHADER, gl.MEDIUM_INT',
-        'gl.VERTEX_SHADER, gl.LOW_INT',
-        'gl.VERTEX_SHADER, gl.LOW_INT',
-        'gl.VERTEX_SHADER, gl.LOW_INT',
-        'gl.FRAGMENT_SHADER, gl.HIGH_INT',
-        'gl.FRAGMENT_SHADER, gl.HIGH_INT',
-        'gl.FRAGMENT_SHADER, gl.HIGH_INT',
-        'gl.FRAGMENT_SHADER, gl.MEDIUM_INT',
-        'gl.FRAGMENT_SHADER, gl.MEDIUM_INT',
-        'gl.FRAGMENT_SHADER, gl.MEDIUM_INT',
-        'gl.FRAGMENT_SHADER, gl.LOW_INT',
-        'gl.FRAGMENT_SHADER, gl.LOW_INT',
-        'gl.FRAGMENT_SHADER, gl.LOW_INT',
     ]
 
-    for i in range(0, len(edges_script_to_webgl)):
-        assert edges_script_to_webgl[i]['edge type'] == 'webapi call'
-        if i > 27:
-            assert edges_script_to_webgl[i]['key'] == 'getShaderPrecisionFormat'
-        elif i == 23 or i == 26:
-            assert edges_script_to_webgl[i]['key'] == 'getExtension'
+    get_extension_args = ['WEBGL_debug_renderer_info', 'EXT_texture_filter_anisotropic']
+
+    i = 0
+    for node in all_nodes_unique:
+        edges = pg_edges_data_from_to(page_graph, executing_node, node)
+        # we make 64 calls to webgl in total (26 to getParameter, 2 to getExtension, and 36 to getContextAttributes)
+        if i == 0:
+            assert len(edges) == 36
+            for j in range(0, len(edges)):
+                assert edges[j]['edge type'] == 'webapi call'
+                assert edges[j]['key'] == node_order[i]
+                assert edges[j]['args'] == shader_args[j]
+        elif i == 1:
+            assert len(edges) == 26
+            for j in range(0, len(edges)):
+                assert edges[j]['edge type'] == 'webapi call'
+                assert edges[j]['key'] == node_order[i]
+                assert edges[j]['args'] == get_parameter_args[j]
         else:
-            assert edges_script_to_webgl[i]['key'] == 'getParameter'
+            assert len(edges) == 2
+            for j in range(0, len(edges)):
+                assert edges[j]['edge type'] == 'webapi call'
+                assert edges[j]['key'] == node_order[i]
+                assert edges[j]['args'] == get_extension_args[j]
 
-        assert edges_script_to_webgl[i]['args'] == function_args[i]
+        i += 1
 
-    # check edges webgl node --> script
-    expected_results = [
+    # result edges...
+    expected_result_shader = [
+        'rangeMin: 127, rangeMax: 127, precision: 23',
+        'rangeMin: 127, rangeMax: 127, precision: 23',
+        'rangeMin: 127, rangeMax: 127, precision: 23',
+        'rangeMin: 127, rangeMax: 127, precision: 23',
+        'rangeMin: 127, rangeMax: 127, precision: 23',
+        'rangeMin: 127, rangeMax: 127, precision: 23',
+        'rangeMin: 127, rangeMax: 127, precision: 23',
+        'rangeMin: 127, rangeMax: 127, precision: 23',
+        'rangeMin: 127, rangeMax: 127, precision: 23',
+        'rangeMin: 127, rangeMax: 127, precision: 23',
+        'rangeMin: 127, rangeMax: 127, precision: 23',
+        'rangeMin: 127, rangeMax: 127, precision: 23',
+        'rangeMin: 127, rangeMax: 127, precision: 23',
+        'rangeMin: 127, rangeMax: 127, precision: 23',
+        'rangeMin: 127, rangeMax: 127, precision: 23',
+        'rangeMin: 127, rangeMax: 127, precision: 23',
+        'rangeMin: 127, rangeMax: 127, precision: 23',
+        'rangeMin: 127, rangeMax: 127, precision: 23',
+        'rangeMin: 31, rangeMax: 30, precision: 0',
+        'rangeMin: 31, rangeMax: 30, precision: 0',
+        'rangeMin: 31, rangeMax: 30, precision: 0',
+        'rangeMin: 31, rangeMax: 30, precision: 0',
+        'rangeMin: 31, rangeMax: 30, precision: 0',
+        'rangeMin: 31, rangeMax: 30, precision: 0',
+        'rangeMin: 31, rangeMax: 30, precision: 0',
+        'rangeMin: 31, rangeMax: 30, precision: 0',
+        'rangeMin: 31, rangeMax: 30, precision: 0',
+        'rangeMin: 31, rangeMax: 30, precision: 0',
+        'rangeMin: 31, rangeMax: 30, precision: 0',
+        'rangeMin: 31, rangeMax: 30, precision: 0',
+        'rangeMin: 31, rangeMax: 30, precision: 0',
+        'rangeMin: 31, rangeMax: 30, precision: 0',
+        'rangeMin: 31, rangeMax: 30, precision: 0',
+        'rangeMin: 31, rangeMax: 30, precision: 0',
+        'rangeMin: 31, rangeMax: 30, precision: 0',
+        'rangeMin: 31, rangeMax: 30, precision: 0',
+    ]
+
+    expected_result_get_parameter = [
         None,
         None,
         None,
@@ -139,55 +195,35 @@ def test(page_graph, html, tab):
         None,
         'WebKit',
         'WebGL 1.0 (OpenGL ES 2.0 Chromium)',
-        None,
         'Google Inc.',
         'Google SwiftShader',
         None,
-        None,
-        'rangeMin: 127, rangeMax: 127, precision: 23',
-        'rangeMin: 127, rangeMax: 127, precision: 23',
-        'rangeMin: 127, rangeMax: 127, precision: 23',
-        'rangeMin: 127, rangeMax: 127, precision: 23',
-        'rangeMin: 127, rangeMax: 127, precision: 23',
-        'rangeMin: 127, rangeMax: 127, precision: 23',
-        'rangeMin: 127, rangeMax: 127, precision: 23',
-        'rangeMin: 127, rangeMax: 127, precision: 23',
-        'rangeMin: 127, rangeMax: 127, precision: 23',
-        'rangeMin: 127, rangeMax: 127, precision: 23',
-        'rangeMin: 127, rangeMax: 127, precision: 23',
-        'rangeMin: 127, rangeMax: 127, precision: 23',
-        'rangeMin: 127, rangeMax: 127, precision: 23',
-        'rangeMin: 127, rangeMax: 127, precision: 23',
-        'rangeMin: 127, rangeMax: 127, precision: 23',
-        'rangeMin: 127, rangeMax: 127, precision: 23',
-        'rangeMin: 127, rangeMax: 127, precision: 23',
-        'rangeMin: 127, rangeMax: 127, precision: 23',
-        'rangeMin: 31, rangeMax: 30, precision: 0',
-        'rangeMin: 31, rangeMax: 30, precision: 0',
-        'rangeMin: 31, rangeMax: 30, precision: 0',
-        'rangeMin: 31, rangeMax: 30, precision: 0',
-        'rangeMin: 31, rangeMax: 30, precision: 0',
-        'rangeMin: 31, rangeMax: 30, precision: 0',
-        'rangeMin: 31, rangeMax: 30, precision: 0',
-        'rangeMin: 31, rangeMax: 30, precision: 0',
-        'rangeMin: 31, rangeMax: 30, precision: 0',
-        'rangeMin: 31, rangeMax: 30, precision: 0',
-        'rangeMin: 31, rangeMax: 30, precision: 0',
-        'rangeMin: 31, rangeMax: 30, precision: 0',
-        'rangeMin: 31, rangeMax: 30, precision: 0',
-        'rangeMin: 31, rangeMax: 30, precision: 0',
-        'rangeMin: 31, rangeMax: 30, precision: 0',
-        'rangeMin: 31, rangeMax: 30, precision: 0',
-        'rangeMin: 31, rangeMax: 30, precision: 0',
-        'rangeMin: 31, rangeMax: 30, precision: 0',
     ]
-    for i in range(0, len(edges_webgl_to_script)):
-        assert edges_webgl_to_script[i]['edge type'] == 'webapi result'
-        if i > 27:
-            assert edges_webgl_to_script[i]['key'] == 'getShaderPrecisionFormat'
-        elif i == 23 or i == 26:
-            assert edges_webgl_to_script[i]['key'] == 'getExtension'
+
+    i = 0
+    for node in all_nodes_unique:
+        edges = pg_edges_data_from_to(page_graph, node, executing_node)
+        if i == 0:
+            assert len(edges) == 36
+            for j in range(0, len(edges)):
+                assert edges[j]['edge type'] == 'webapi result'
+                assert edges[j]['key'] == node_order[i]
+                assert edges[j]['value'] == expected_result_shader[j]
+        elif i == 1:
+            assert len(edges) == 26
+            for j in range(0, len(edges)):
+                assert edges[j]['edge type'] == 'webapi result'
+                assert edges[j]['key'] == node_order[i]
+                if expected_result_get_parameter[j] != None:
+                    assert edges[j]['value'] == expected_result_get_parameter[j]
+                else:
+                    assert len(edges[j]) == 2
         else:
-            assert edges_webgl_to_script[i]['key'] == 'getParameter'
-        if i == 18 or i == 19 or i == 21 or i == 22 or i == 24 or i == 25 or i > 27:
-            assert edges_webgl_to_script[i]['value'] == expected_results[i]
+            assert len(edges) == 2
+            for j in range(0, len(edges)):
+                # we can't convert the result values to strings...
+                assert len(edges[j]) == 2
+                assert edges[j]['edge type'] == 'webapi result'
+                assert edges[j]['key'] == node_order[i]
+
+        i += 1
