@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+  <meta charset="utf-8"/>
+  <title>Testing area for event listeners</title>
+</head>
+<body>
+  <div></div>
+  <script>
+    const elem = document.getElementsByTagName('div')[0];
+
+    function foo () {}
+    function bar () {}
+    const baz = () => {};
+
+    const boundFoo = foo.bind({});
+    const boundBoundFoo = boundFoo.bind({});
+
+    elem.addEventListener('click', foo);
+    elem.addEventListener('click', foo);
+    elem.addEventListener('click', boundFoo);
+    elem.addEventListener('click', boundBoundFoo);
+    elem.addEventListener('click', bar);
+    elem.addEventListener('click', baz);
+
+    elem.removeEventListener('click', foo);
+    elem.removeEventListener('click', foo);
+    elem.removeEventListener('click', boundFoo);
+    elem.removeEventListener('click', boundBoundFoo);
+    elem.removeEventListener('click', bar);
+    elem.removeEventListener('click', baz);
+  </script>
+  <script>
+    const boundBoundBoundFoo = boundBoundFoo.bind({});
+
+    elem.addEventListener('click', foo);
+    elem.addEventListener('click', foo);
+    elem.addEventListener('click', boundFoo);
+    elem.addEventListener('click', boundBoundFoo);
+    elem.addEventListener('click', boundBoundBoundFoo);
+    elem.addEventListener('click', bar);
+    elem.addEventListener('click', baz);
+
+    elem.removeEventListener('click', foo);
+    elem.removeEventListener('click', foo);
+    elem.removeEventListener('click', boundFoo);
+    elem.removeEventListener('click', boundBoundFoo);
+    elem.removeEventListener('click', boundBoundBoundFoo);
+    elem.removeEventListener('click', bar);
+    elem.removeEventListener('click', baz);
+  </script>
+  <script>
+    function quux () {}
+
+    elem.onclick = quux;
+    elem.onclick = foo;
+  </script>
+  <script>
+    elem.onclick = quux;
+  </script>
+</body>
+</html>

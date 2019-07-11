@@ -186,7 +186,6 @@ def pg_find_static_node(pg, static_node):
 
     return None
 
-
 # returns all data on edges from from_node to to_node
 def pg_edges_data_from_to(pg, from_node, to_node):
     data_from = []
@@ -212,6 +211,14 @@ def pg_nodes_directly_reachable_from_with_edge_type(pg, from_node, edge_type):
 
     return nodes
 
-
 def pg_get_node_data(pg, node):
     return pg.nodes[node]
+
+def pg_edge_out(edge):
+    return edge[0]
+
+def pg_edge_in(edge):
+    return edge[1]
+
+def pg_edge_data(edge, key):
+    return edge[2][key]

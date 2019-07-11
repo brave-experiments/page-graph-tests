@@ -224,13 +224,12 @@ async def run_test(test_name, brave_exe_path, headless=True):
                 # corresponding page graph, and a reference to the open browser tab.
                 test_spec.loader.exec_module(test_module)
                 test_module.test(page_graph, test_page_html, tab)
-            except AssertionError as e:
-                print('...' + Fore.RED + 'FAIL' + Fore.RESET)
-                print(Fore.MAGENTA + 'Test Error:' + Fore.RESET)
-                traceback.print_exc(limit=-1)
             except BaseException as e:
-                print('...' + Fore.YELLOW + 'ERROR' + Fore.RESET)
-                print(Fore.MAGENTA + 'Test Error:' + Fore.RESET)
+                if isinstance(e, AssertionError):
+                    print('...' + Fore.RED + 'FAIL' + Fore.RESET)
+                else:
+                    print('...' + Fore.YELLOW + 'ERROR' + Fore.RESET)
+                print(Fore.MAGENTA + 'Test Traceback:' + Fore.RESET)
                 traceback.print_exc()
             else:
                 test_succeeded = True
