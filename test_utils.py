@@ -177,13 +177,14 @@ def pg_node_id_mapping(pg):
             ret[e['node id']] = n
     return ret
 
-# storage_node is either "cookie jar", "local storage" or "session storage"
-def pg_find_storage_node(pg, storage_node):
+# static_node is one of the following: "cookie jar", "local storage",
+# "session storage", "Canvas", "Navigator", "WebGL" and "Screen"
+def pg_find_static_node(pg, static_node):
     for n, e in pg.nodes(data=True):
-        if e['node type'] == storage_node:
+        if e['node type'] == static_node:
             return n
 
-    return undefined
+    return None
 
 
 # returns all data on edges from from_node to to_node

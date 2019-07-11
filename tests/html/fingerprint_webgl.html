@@ -1,0 +1,56 @@
+<html>
+  <head>
+    <title>WebGL test</title>
+  </head>
+
+  <body>
+    <canvas id="canvas" width="100" height="100"></canvas>
+
+    <script>
+      // All getParameter from fingerprintjs
+      const canvas = document.getElementById('canvas');
+      const gl = canvas.getContext('webgl');
+      gl.getParameter(gl.ALIASED_LINE_WIDTH_RANGE);
+      gl.getParameter(gl.ALIASED_POINT_SIZE_RANGE);
+      gl.getParameter(gl.ALPHA_BITS);
+      gl.getParameter(gl.BLUE_BITS);
+      gl.getParameter(gl.DEPTH_BITS);
+      gl.getParameter(gl.GREEN_BITS);
+      gl.getParameter(gl.MAX_COMBINED_TEXTURE_IMAGE_UNITS);
+      gl.getParameter(gl.MAX_CUBE_MAP_TEXTURE_SIZE);
+      gl.getParameter(gl.MAX_FRAGMENT_UNIFORM_VECTORS);
+      gl.getParameter(gl.MAX_RENDERBUFFER_SIZE);
+      gl.getParameter(gl.MAX_TEXTURE_IMAGE_UNITS);
+      gl.getParameter(gl.MAX_TEXTURE_SIZE);
+      gl.getParameter(gl.MAX_VARYING_VECTORS);
+      gl.getParameter(gl.MAX_VERTEX_ATTRIBS);
+      gl.getParameter(gl.MAX_VERTEX_TEXTURE_IMAGE_UNITS);
+      gl.getParameter(gl.MAX_VERTEX_UNIFORM_VECTORS);
+      gl.getParameter(gl.MAX_VIEWPORT_DIMS);
+      gl.getParameter(gl.RED_BITS);
+      gl.getParameter(gl.RENDERER);
+      gl.getParameter(gl.SHADING_LANGUAGE_VERSION);
+      gl.getParameter(gl.STENCIL_BITS);
+      gl.getParameter(gl.VENDOR);
+      gl.getParameter(gl.VERSION);
+
+
+      let extensionDebugRendererInfo = gl.getExtension('WEBGL_debug_renderer_info');
+      gl.getParameter(extensionDebugRendererInfo.UNMASKED_VENDOR_WEBGL);
+      gl.getParameter(extensionDebugRendererInfo.UNMASKED_RENDERER_WEBGL);
+      let ext = gl.getExtension('EXT_texture_filter_anisotropic');
+      gl.getParameter(ext.MAX_TEXTURE_MAX_ANISOTROPY_EXT);
+
+
+      ['FLOAT', 'INT'].forEach(function (numType) {
+        ['VERTEX', 'FRAGMENT'].forEach(function (shader) {
+          ['HIGH', 'MEDIUM', 'LOW'].forEach(function (numSize) {
+            ['precision', 'rangeMin', 'rangeMax'].forEach(function (key) {
+              var format = gl.getShaderPrecisionFormat(gl[shader + '_SHADER'], gl[numSize + '_' + numType])[key]
+            })
+          })
+        })
+      });
+    </script>
+  </body>
+</html>

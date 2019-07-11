@@ -7,7 +7,7 @@
 from test_utils import (
     pg_top_document_root,
     pg_find_html_element_node,
-    pg_find_storage_node,
+    pg_find_static_node,
     pg_edges_data_from_to,
     generate_script_text_selector,
 )
@@ -22,7 +22,7 @@ def test(page_graph, html, tab):
     assert len(script_nodes) == 1
 
     script_node = script_nodes[0]
-    storage_node = pg_find_storage_node(page_graph, 'session storage')
+    storage_node = pg_find_static_node(page_graph, 'session storage')
 
     script_successors = list(page_graph.successors(script_node))
 

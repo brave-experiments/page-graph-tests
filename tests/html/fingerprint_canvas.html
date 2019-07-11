@@ -1,0 +1,72 @@
+<html>
+  <head>
+    <title>Canvas test</title>
+  </head>
+
+  <body>
+    <canvas id="canvas" width="100" height="100"></canvas>
+
+    <script>
+      function fp() {
+        var canvas = document.createElement('canvas');
+        var ctx = canvas.getContext('2d');
+        var txt = 'i9asdm..$#po((^@KbXrww!~cz';
+        ctx.textBaseline = "top";
+        ctx.font = "16px 'Arial'";
+        ctx.textBaseline = "alphabetic";
+        ctx.rotate(.05);
+        ctx.fillStyle = "#f60";
+        ctx.fillRect(125,1,62,20);
+        ctx.fillStyle = "#069";
+        ctx.fillText(txt, 2, 15);
+        ctx.fillStyle = "rgba(102, 200, 0, 0.7)";
+        ctx.fillText(txt, 4, 17);
+        ctx.shadowBlur=10;
+        ctx.shadowColor="blue";
+        ctx.fillRect(-20,10,234,5);
+        var strng=canvas.toDataURL('image/jpeg', 0.5);
+
+        document.body.appendChild(canvas);    
+    
+        var hash=0;
+        if (strng.length==0) return 'nothing!';
+        for (i = 0; i < strng.length; i++) {
+          char = strng.charCodeAt(i);
+          hash = ((hash<<5)-hash)+char;
+          hash = hash & hash;
+        }
+        return hash;
+      }
+
+      fp();
+    </script>
+
+    <script>
+      function test() {
+        var canvas = document.getElementById('canvas');
+        var context = canvas.getContext('2d');
+        context.fillStyle = 'rgba(255, 255, 0, .5)';
+        context.fillRect(0, 0, 100, 100);
+        canvas.toBlob(function(blob) {
+          var newImg = document.createElement('img'),
+          url = URL.createObjectURL(blob);
+
+          newImg.src = url;
+          document.body.appendChild(newImg);
+          console.log('url: ', url);
+          console.log('image: ', newImg);
+        });
+      }
+
+      test();
+    </script>
+
+    <script>
+      const canvas = document.getElementById('canvas');
+      const ctx = canvas.getContext('2d');
+
+      let text = ctx.measureText('Hello world');
+      console.log(text.width);  // 56;
+    </script>
+  </body>
+</html>
