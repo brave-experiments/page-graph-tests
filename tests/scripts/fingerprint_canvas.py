@@ -35,9 +35,15 @@ def test(page_graph, html, tab):
     )
     assert len(script_nodes_measure_text) == 1
 
+    script_nodes_is_point_in_path = pg_find_html_element_node(
+        page_graph, 'script', generate_script_text_selector('isPointInPath')
+    )
+    assert len(script_nodes_is_point_in_path) == 1
+
     script_node_to_data_url = script_nodes_to_data_url[0]
     script_node_to_blob = script_nodes_to_blob[0]
     script_node_measure_text = script_nodes_measure_text[0]
+    script_node_is_point_in_path = script_nodes_is_point_in_path[0]
 
     successors_to_data_url = list(page_graph.successors(script_node_to_data_url))
     assert len(successors_to_data_url) == 2  # since we are an inline script tag
@@ -48,29 +54,45 @@ def test(page_graph, html, tab):
     successors_to_blob = list(page_graph.successors(script_node_to_blob))
     assert len(successors_to_blob) == 2  # since we are an inline script tag
 
+    successors_is_point_in_path = list(page_graph.successors(script_node_is_point_in_path))
+    assert len(successors_is_point_in_path) == 2  # since we are an inline script tag
+
     # check so all the nodes directly reachable from each script goes to the correct canvas node
     executing_node_to_data_url = successors_to_data_url[1]
     canvas_to_data_url_node = pg_nodes_directly_reachable_from_with_edge_type(
         page_graph, executing_node_to_data_url, 'webapi call'
     )
-    assert len(canvas_to_data_url_node) == 1
+    # should be two, one edge to the 'getContext' call, and one for the 'toDataURL' node
+    assert len(canvas_to_data_url_node) == 2
 
-    edges = pg_edges_data_from_to(
+    edge_get_context = edges = pg_edges_data_from_to(
         page_graph, executing_node_to_data_url, canvas_to_data_url_node[0]
     )
-    assert len(edges) == 1
-    edge = edges[0]
-    assert edge['edge type'] == 'webapi call'
-    assert edge['key'] == 'HTMLCanvasElement.toDataURL'
-    assert edge['args'] == 'image/jpeg, 0.500000'
+    assert len(edge_get_context) == 1
+    edge_get_context = edge_get_context[0]
+    assert edge_get_context['edge type'] == 'webapi call'
+    assert edge_get_context['key'] == 'HTMLCanvasElement.getContext'
+    assert (
+        edge_get_context['args']
+        == '2d, alpha: 1, antialias: 1, color_space: "srgb", depth: 1, fail_if_major_performance_caveat: 0, desynchronized: 0, pixel_format: "uint8", premultiplied_alpha: 1, preserve_drawing_buffer: 0, power_preference: "default", stencil: 0, xr_compatible: 0'
+    )
+
+    edge_to_data_url = pg_edges_data_from_to(
+        page_graph, executing_node_to_data_url, canvas_to_data_url_node[1]
+    )
+    assert len(edge_to_data_url) == 1
+    edge_to_data_url = edge_to_data_url[0]
+    assert edge_to_data_url['edge type'] == 'webapi call'
+    assert edge_to_data_url['key'] == 'HTMLCanvasElement.toDataURL'
+    assert edge_to_data_url['args'] == 'image/jpeg, 0.500000'
 
     executing_node_to_blob = successors_to_blob[1]
     canvas_to_blob_node = pg_nodes_directly_reachable_from_with_edge_type(
         page_graph, executing_node_to_blob, 'webapi call'
     )
-    assert len(canvas_to_blob_node) == 1
+    assert len(canvas_to_blob_node) == 2
 
-    edges = pg_edges_data_from_to(page_graph, executing_node_to_blob, canvas_to_blob_node[0])
+    edges = pg_edges_data_from_to(page_graph, executing_node_to_blob, canvas_to_blob_node[1])
     assert len(edges) == 1
     edge = edges[0]
     assert edge['edge type'] == 'webapi call'
@@ -81,10 +103,10 @@ def test(page_graph, html, tab):
     canvas_measure_text_node = pg_nodes_directly_reachable_from_with_edge_type(
         page_graph, executing_node_measure_text, 'webapi call'
     )
-    assert len(canvas_measure_text_node) == 1
+    assert len(canvas_measure_text_node) == 2
 
     edges = pg_edges_data_from_to(
-        page_graph, executing_node_measure_text, canvas_measure_text_node[0]
+        page_graph, executing_node_measure_text, canvas_measure_text_node[1]
     )
     assert len(edges) == 1
     edge = edges[0]
@@ -92,9 +114,34 @@ def test(page_graph, html, tab):
     assert edge['key'] == 'CanvasRenderingContext2D.measureText'
     assert edge['args'] == 'Hello world'
 
+    executing_node_is_point_in_path = successors_is_point_in_path[1]
+    canvas_is_point_in_path_node = pg_nodes_directly_reachable_from_with_edge_type(
+        page_graph, executing_node_is_point_in_path, 'webapi call'
+    )
+
+    assert len(canvas_is_point_in_path_node) == 1
+
+    edges = pg_edges_data_from_to(
+        page_graph, executing_node_is_point_in_path, canvas_is_point_in_path_node[0]
+    )
+    assert len(edges) == 1
+    edge = edges[0]
+    assert edge['edge type'] == 'webapi call'
+    assert edge['key'] == 'CanvasRenderingContext2D.isPointInPath'
+    assert edge['args'] == '5.000000, 5.000000, evenodd'
+
     # result edges
     edges = pg_edges_data_from_to(
         page_graph, canvas_to_data_url_node[0], executing_node_to_data_url
+    )
+    assert len(edges) == 1
+    edge = edges[0]
+    assert edge['edge type'] == 'webapi result'
+    assert edge['key'] == 'HTMLCanvasElement.getContext'
+    assert edge['value'] == 'CanvasRenderingContext: 2d'
+
+    edges = pg_edges_data_from_to(
+        page_graph, canvas_to_data_url_node[1], executing_node_to_data_url
     )
     assert len(edges) == 1
     edge = edges[0]
@@ -105,11 +152,11 @@ def test(page_graph, html, tab):
         == 'data:image/jpeg;base64,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'
     )
 
-    edges = pg_edges_data_from_to(page_graph, canvas_to_blob_node[0], executing_node_to_blob)
+    edges = pg_edges_data_from_to(page_graph, canvas_to_blob_node[1], executing_node_to_blob)
     assert len(edges) == 0
 
     edges = pg_edges_data_from_to(
-        page_graph, canvas_measure_text_node[0], executing_node_measure_text
+        page_graph, canvas_measure_text_node[1], executing_node_measure_text
     )
     assert len(edges) == 1
     edge = edges[0]
@@ -119,3 +166,12 @@ def test(page_graph, html, tab):
         edge['value']
         == 'width: 49.4629, actualBoundingBoxLeft: -0.800781, actualBoundingBoxRight: 48.7402, fontBoundingBoxAscent: 9, fontBoundingBoxDescent: 2, actualBoundingBoxAscent: 7.1582, actualBoundingBoxDescent: 0.117188, emHeightAscent: 7.75, emHeightDescent: 2.25, hangingBaseline: 7.2, alphabeticBaseline: -0, ideographicBaseline: -2'
     )
+
+    edges = pg_edges_data_from_to(
+        page_graph, canvas_is_point_in_path_node[0], executing_node_is_point_in_path
+    )
+    assert len(edges) == 1
+    edge = edges[0]
+    assert edge['edge type'] == 'webapi result'
+    assert edge['key'] == 'CanvasRenderingContext2D.isPointInPath'
+    assert edge['value'] == 'false'

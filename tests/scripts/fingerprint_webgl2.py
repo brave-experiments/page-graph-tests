@@ -27,14 +27,15 @@ def test(page_graph, html, tab):
     executing_node = successors[1]
     all_webgl_nodes = pg_nodes_directly_reachable_from(page_graph, executing_node)
     all_nodes_unique = sorted(set(all_webgl_nodes))
-    # length should be 4 (we call 3 different webgl functions, two calls to getParameter are in the context of webgl2)
-    assert len(set(all_nodes_unique)) == 4
+    # length should be 5 (we call 3 different webgl functions, two calls to getParameter are in the context of webgl2, and the call to getContext)
+    assert len(set(all_nodes_unique)) == 5
 
     node_order = [
+        'WebGLRenderingContext.getExtension',
         'WebGLRenderingContext.getShaderPrecisionFormat',
+        'HTMLCanvasElement.getContext',
         'WebGLRenderingContext.getParameter',
         'WebGL2RenderingContext.getParameter',
-        'WebGLRenderingContext.getExtension',
     ]
 
     shader_args = [
@@ -110,31 +111,40 @@ def test(page_graph, html, tab):
     i = 0
     for node in all_nodes_unique:
         edges = pg_edges_data_from_to(page_graph, executing_node, node)
-        # we make 64 calls to webgl in total (26 to getParameter (24 in WebGL1, 2 in WebGL2), 2 to getExtension, and 36 to getContextAttributes)
+        # first node is for getContext
         if i == 0:
-            assert len(edges) == 36
-            for j in range(0, len(edges)):
-                assert edges[j]['edge type'] == 'webapi call'
-                assert edges[j]['key'] == node_order[i]
-                assert edges[j]['args'] == shader_args[j]
-        elif i == 1:
-            assert len(edges) == 24
-            for j in range(0, len(edges)):
-                assert edges[j]['edge type'] == 'webapi call'
-                assert edges[j]['key'] == node_order[i]
-                assert edges[j]['args'] == get_parameter_args[j]
-        elif i == 2:
-            assert len(edges) == 2
-            for j in range(0, len(edges)):
-                assert edges[j]['edge type'] == 'webapi call'
-                assert edges[j]['key'] == node_order[i]
-                assert edges[j]['args'] == get_parameter_args_webgl2[j]
-        else:
             assert len(edges) == 2
             for j in range(0, len(edges)):
                 assert edges[j]['edge type'] == 'webapi call'
                 assert edges[j]['key'] == node_order[i]
                 assert edges[j]['args'] == get_extension_args[j]
+        # we make 64 calls to webgl in total (26 to getParameter, 2 to getExtension, and 36 to getContextAttributes)
+        elif i == 1:
+            assert len(edges) == 36
+            for j in range(0, len(edges)):
+                assert edges[j]['edge type'] == 'webapi call'
+                assert edges[j]['key'] == node_order[i]
+                assert edges[j]['args'] == shader_args[j]
+        elif i == 2:
+            assert len(edges) == 1
+            assert edges[0]['edge type'] == 'webapi call'
+            assert edges[0]['key'] == node_order[i]
+            assert (
+                edges[0]['args']
+                == 'webgl2, alpha: 1, antialias: 1, color_space: "srgb", depth: 1, fail_if_major_performance_caveat: 0, desynchronized: 0, pixel_format: "uint8", premultiplied_alpha: 1, preserve_drawing_buffer: 0, power_preference: "default", stencil: 0, xr_compatible: 0'
+            )
+        elif i == 3:
+            assert len(edges) == 24
+            for j in range(0, len(edges)):
+                assert edges[j]['edge type'] == 'webapi call'
+                assert edges[j]['key'] == node_order[i]
+                assert edges[j]['args'] == get_parameter_args[j]
+        else:
+            assert len(edges) == 2
+            for j in range(0, len(edges)):
+                assert edges[j]['edge type'] == 'webapi call'
+                assert edges[j]['key'] == node_order[i]
+                assert edges[j]['args'] == get_parameter_args_webgl2[j]
 
         i += 1
 
@@ -214,12 +224,24 @@ def test(page_graph, html, tab):
     for node in all_nodes_unique:
         edges = pg_edges_data_from_to(page_graph, node, executing_node)
         if i == 0:
+            assert len(edges) == 2
+            for j in range(0, len(edges)):
+                # we can't convert the result values to strings...
+                assert len(edges[j]) == 2
+                assert edges[j]['edge type'] == 'webapi result'
+                assert edges[j]['key'] == node_order[i]
+        elif i == 1:
             assert len(edges) == 36
             for j in range(0, len(edges)):
                 assert edges[j]['edge type'] == 'webapi result'
                 assert edges[j]['key'] == node_order[i]
                 assert edges[j]['value'] == expected_result_shader[j]
-        elif i == 1:
+        elif i == 2:
+            assert len(edges) == 1
+            assert edges[0]['edge type'] == 'webapi result'
+            assert edges[0]['key'] == node_order[i]
+            assert edges[0]['value'] == 'CanvasRenderingContext: webgl2'
+        elif i == 3:
             assert len(edges) == 24
             for j in range(0, len(edges)):
                 assert edges[j]['edge type'] == 'webapi result'
@@ -228,21 +250,11 @@ def test(page_graph, html, tab):
                     assert edges[j]['value'] == expected_result_get_parameter[j]
                 else:
                     assert len(edges[j]) == 2
-        elif i == 2:
-            assert len(edges) == 2
-            for j in range(0, len(edges)):
-                assert edges[j]['edge type'] == 'webapi result'
-                assert edges[j]['key'] == node_order[i]
-                if expected_result_get_parameter_webgl2[j] != None:
-                    assert edges[j]['value'] == expected_result_get_parameter_webgl2[j]
-                else:
-                    assert len(edges[j]) == 2
         else:
             assert len(edges) == 2
             for j in range(0, len(edges)):
-                # we can't convert the result values to strings...
-                assert len(edges[j]) == 2
                 assert edges[j]['edge type'] == 'webapi result'
                 assert edges[j]['key'] == node_order[i]
+                assert edges[j]['value'] == expected_result_get_parameter_webgl2[j]
 
         i += 1
