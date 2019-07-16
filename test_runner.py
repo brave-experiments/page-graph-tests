@@ -99,7 +99,8 @@ async def run_test(test_name, brave_exe_path, headless=True):
         brave_args = [
             # Arguments Puppeteer uses when launching Chrome:
             '--disable-background-networking',
-            '--enable-features=NetworkService,NetworkServiceInProcess',
+            # '--enable-features=NetworkService,NetworkServiceInProcess',
+            # ^ breaks Brave Shields
             '--disable-background-timer-throttling',
             '--disable-backgrounding-occluded-windows',
             '--disable-breakpad',
@@ -110,7 +111,8 @@ async def run_test(test_name, brave_exe_path, headless=True):
             '--disable-features=site-per-process,TranslateUI,BlinkGenPropertyTrees',
             '--disable-hang-monitor',
             '--disable-ipc-flooding-protection',
-            '--disable-popup-blocking' '--disable-prompt-on-repost',
+            '--disable-popup-blocking',
+            '--disable-prompt-on-repost',
             '--disable-renderer-backgrounding',
             '--disable-sync',
             '--force-color-profile=srgb',
