@@ -51,14 +51,14 @@ def test(page_graph, html, tab):
         assert edge['key'] == node_order[i]
 
     # check the result edges
-    expected_results = [
-        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_5) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/75.0.67.70 Safari/537.36',
-        'en-US',
-        'en-US',
+    result_validators = [
+        lambda x: x.startswith('Mozilla/5.0 '),
+        lambda x: x == 'en-US',
+        lambda x: x == 'en-US',
         None,
         None,
-        'true',
-        'MacIntel',
+        lambda x: x == 'true',
+        lambda x: x in ['MacIntel', 'Win32', 'Linux x86_64'],
     ]
     for i in range(0, len(all_navigator_nodes)):
         edges = pg_edges_data_from_to(page_graph, all_navigator_nodes[i], executing_node)
@@ -67,10 +67,10 @@ def test(page_graph, html, tab):
         edge = edges[0]
         assert edge['edge type'] == 'webapi result'
         assert edge['key'] == node_order[i]
-        if expected_results[i]:
+        if result_validators[i]:
             # should be exactly 3 keys (type, key and value)
             assert len(edge) == 3
-            assert edge['value'] == expected_results[i]
+            assert result_validators[i](edge['value'])
         else:
             # should be exactly 2 keys (type, key), since we didn't return a value
             assert len(edge) == 2

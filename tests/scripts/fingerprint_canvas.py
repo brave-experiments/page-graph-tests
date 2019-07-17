@@ -147,10 +147,7 @@ def test(page_graph, html, tab):
     edge = edges[0]
     assert edge['edge type'] == 'webapi result'
     assert edge['key'] == 'HTMLCanvasElement.toDataURL'
-    assert (
-        edge['value']
-        == 'data:image/jpeg;base64,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'
-    )
+    assert edge['value'].startswith('data:image/jpeg;base64,')
 
     edges = pg_edges_data_from_to(page_graph, canvas_to_blob_node[1], executing_node_to_blob)
     assert len(edges) == 0
@@ -162,10 +159,7 @@ def test(page_graph, html, tab):
     edge = edges[0]
     assert edge['edge type'] == 'webapi result'
     assert edge['key'] == 'CanvasRenderingContext2D.measureText'
-    assert (
-        edge['value']
-        == 'width: 49.4629, actualBoundingBoxLeft: -0.800781, actualBoundingBoxRight: 48.7402, fontBoundingBoxAscent: 9, fontBoundingBoxDescent: 2, actualBoundingBoxAscent: 7.1582, actualBoundingBoxDescent: 0.117188, emHeightAscent: 7.75, emHeightDescent: 2.25, hangingBaseline: 7.2, alphabeticBaseline: -0, ideographicBaseline: -2'
-    )
+    assert edge['value'].startswith('width: ')
 
     edges = pg_edges_data_from_to(
         page_graph, canvas_is_point_in_path_node[0], executing_node_is_point_in_path
