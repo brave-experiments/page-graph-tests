@@ -66,10 +66,10 @@ def pg_enumerate_xpaths_with_action(pg, pg_node, parent_xpath, action, cross_dom
                 and pg_nodes[pg_child]['node type'] == 'local frame'
             ):
                 pg_grandchildren = list(pg[pg_child].keys())
-                assert len(pg_grandchildren) == 1
+                assert len(pg_grandchildren) == 2  # includes initial empty doc
                 # pg_grandchildren[0] is the dom root node.
                 pg_enumerate_xpaths_with_action(
-                    pg, _dom_root_html(pg, pg_grandchildren[0]), current_xpath, action, True
+                    pg, _dom_root_html(pg, pg_grandchildren[1]), current_xpath, action, True
                 )
             else:
                 continue

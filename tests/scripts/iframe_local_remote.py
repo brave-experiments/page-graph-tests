@@ -32,10 +32,13 @@ def test(page_graph, html, tab):
     s = s[0]
     assert page_graph_nodes[s]['node type'] == 'local frame'
 
+    # Check that we have both the empty-frame DOM root that |local_iframe_node|
+    # is initialized with as well as the DOM root it gets when the static page
+    # loads.
     s = list(page_graph.successors(s))
-    assert len(s) == 1
-    s = s[0]
-    assert page_graph_nodes[s]['node type'] == 'dom root'
+    assert len(s) == 2
+    for node in s:
+        assert page_graph_nodes[node]['node type'] == 'dom root'
 
     # Check successors of |remote_iframe_node|.
     #
