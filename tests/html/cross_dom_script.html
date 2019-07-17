@@ -1,28 +1,42 @@
 <html>
 <head>
-	<title>Cross DOM Script Test</title>
+  <title>Cross DOM Script Test</title>
 </head>
-<body>
-	<iframe id="child_iframe" src="/cross_dom_script_iframe.html"></iframe>
-	<h1 id="output"></h1>
+<body data-test-wait="">
+  <iframe id="child_iframe" src="/cross_dom_script_iframe.html"></iframe>
+  <h1 id="output"></h1>
 
-	<script>
+  <script>
 
-	function parent_func(msg) {
-		document.getElementById("output").textContent = msg;
-	}
+  var called_child_func = false;
+  var called_parent_func = false;
+  function check_done() {
+    if (called_child_func)
+    if (called_parent_func) {
+      delete document.body.dataset.testWait;
+    }
+  }
 
-	function call_child_func() {
-		var child_window =
-				document.getElementById("child_iframe").contentWindow;
-		var child_func = child_window.child_func;
-		if (child_func)
-			child_func("Hello from parent");
-		else
-			setTimeout(call_child_func, 100);
-	}
-	call_child_func();
+  function parent_func(msg) {
+    document.getElementById("output").textContent = msg;
+    called_parent_func = true;
+    check_done();
+  }
 
-	</script>
+  function call_child_func() {
+    var child_window =
+        document.getElementById("child_iframe").contentWindow;
+    var child_func = child_window.child_func;
+    if (child_func) {
+      child_func("Hello from parent");
+      called_child_func = true;
+      check_done();
+    } else {
+      setTimeout(call_child_func, 100);
+    }
+  }
+  call_child_func();
+
+  </script>
 </body>
 </html>

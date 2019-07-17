@@ -26,6 +26,10 @@ from networkx import graphml
 
 process_termination_timeout = 10
 
+wait_check_interval = 0.2
+wait_timeout = 30
+wait_js = 'document.body.dataset.hasOwnProperty("testWait")'
+
 devtools_listening_re = re.compile('^DevTools listening on (?P<devtools_ws_uri>.+)$')
 
 web_server_host = 'localhost'
@@ -196,6 +200,15 @@ async def run_test(test_name, brave_exe_path, headless=True):
                 devtools.page.Page.navigate(url=test_page_uri),
                 await_on_event_type=devtools.page.FrameStoppedLoadingEvent,
             )
+
+            # Sleep while "data-test-wait" is set on the document's body.
+            total_time = 0
+            while total_time < wait_timeout:
+                has_wait_attribute = (await tab.evaluate(wait_js))['ack']['result']['result'].value
+                if not has_wait_attribute:
+                    break
+                await asyncio.sleep(wait_check_interval)
+                total_time += wait_check_interval
 
             # Grab and parse the page graph data.
 

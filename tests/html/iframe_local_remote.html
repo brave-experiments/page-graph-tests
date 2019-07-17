@@ -1,26 +1,28 @@
 <html>
 <head>
-	<title>Local and Remote IFrame Test</title>
+  <title>Local and Remote IFrame Test</title>
 </head>
-<body>
-	<iframe id="local_iframe" src="./static_page.html"></iframe>
-	<iframe id="remote_iframe" src="https://example.com"></iframe>
-	<!--<iframe id="remote_iframe"
-			src="https://www.google.com/webhp?igu=1"></iframe>-->
+<body data-test-wait="">
+  <iframe id="local_iframe" src="./static_page.html"></iframe>
+  <iframe id="remote_iframe" src="https://example.com"></iframe>
+  <!--<iframe id="remote_iframe"
+      src="https://www.google.com/webhp?igu=1"></iframe>-->
 
-	<br/>
-	<p id="output"></p>
+  <br/>
+  <p id="output"></p>
 
-	<script>
-	setTimeout(function() {
-		var p = document.getElementById("output");
-		try {
-			var w = document.getElementById("remote_iframe").contentWindow;
-			p.textContent = w.document.readyState;
-		} catch (e) {
-			p.textContent = e.toString();
-		}
-	}, 3000);
-	</script>
+  <script>
+  setTimeout(function() {
+    var p = document.getElementById("output");
+    try {
+      var w = document.getElementById("remote_iframe").contentWindow;
+      p.textContent = w.document.readyState;
+    } catch (e) {
+      p.textContent = e.toString();
+    }
+
+    delete document.body.dataset.testWait;
+  }, 3000);
+  </script>
 </body>
 </html>
