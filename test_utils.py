@@ -211,6 +211,18 @@ def pg_nodes_directly_reachable_from_with_edge_type(pg, from_node, edge_type):
 
     return nodes
 
+def pg_edges_directly_leading_to_with_edge_type(pg, to_node, edge_type):
+    edges = []
+    for from_n, to_n, data in pg.edges(data=True):
+        if to_n == to_node and data['edge type'] == edge_type:
+            edges.append({'from': from_n, 'to': to_n, 'data': data})
+
+    return edges
+
+def pg_nodes_directly_leading_to_with_edge_type(pg, to_node, edge_type):
+    edges = pg_edges_directly_leading_to_with_edge_type(pg, to_node, edge_type)
+    return [edge['from'] for edge in edges]
+
 def pg_get_node_data(pg, node):
     return pg.nodes[node]
 

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+  <meta charset="utf-8"/>
+  <title>Script Data URI Testing</title>
+</head>
+<body>
+  <script type="text/javascript">
+    (() => {
+      const f = () => {
+        document.body.appendChild(document.createElement('div'));
+      };
+
+      const elem = document.createElement('script');
+      elem.src = 'data:application/javascript;charset=utf-8,' +
+                 encodeURIComponent(`(${f.toString()})();`);
+      document.body.appendChild(elem);
+    })();
+  </script>
+</body>
+</html>
