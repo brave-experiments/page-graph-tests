@@ -28,14 +28,7 @@ def test(page_graph, html, tab):
     all_webgl_nodes = pg_nodes_directly_reachable_from(page_graph, executing_node)
     all_nodes_unique = sorted(set(all_webgl_nodes))
     # length should be 4 (1 is getContext, the rest are the 3 different webgl functions)
-    assert len(set(all_nodes_unique)) == 4
-
-    node_order = [
-        'WebGLRenderingContext.getExtension',
-        'WebGLRenderingContext.getShaderPrecisionFormat',
-        'HTMLCanvasElement.getContext',
-        'WebGLRenderingContext.getParameter',
-    ]
+    assert len(all_nodes_unique) == 4
 
     shader_args = [
         'gl.VERTEX_SHADER, gl.HIGH_FLOAT',
@@ -107,138 +100,73 @@ def test(page_graph, html, tab):
 
     get_extension_args = ['WEBGL_debug_renderer_info', 'EXT_texture_filter_anisotropic']
 
-    i = 0
     for node in all_nodes_unique:
         edges = pg_edges_data_from_to(page_graph, executing_node, node)
-        # first node is for getContext
-        if i == 0:
-            assert len(edges) == 2
-            for j in range(0, len(edges)):
-                assert edges[j]['edge type'] == 'webapi call'
-                assert edges[j]['key'] == node_order[i]
-                assert edges[j]['args'] == get_extension_args[j]
-        # we make 64 calls to webgl in total (26 to getParameter, 2 to getExtension, and 36 to getContextAttributes)
-        elif i == 1:
-            assert len(edges) == 36
-            for j in range(0, len(edges)):
-                assert edges[j]['edge type'] == 'webapi call'
-                assert edges[j]['key'] == node_order[i]
-                assert edges[j]['args'] == shader_args[j]
-        elif i == 2:
-            assert len(edges) == 1
-            assert edges[0]['edge type'] == 'webapi call'
-            assert edges[0]['key'] == node_order[i]
-            assert (
-                edges[0]['args']
-                == 'webgl, alpha: 1, antialias: 1, color_space: "srgb", depth: 1, fail_if_major_performance_caveat: 0, desynchronized: 0, pixel_format: "uint8", premultiplied_alpha: 1, preserve_drawing_buffer: 0, power_preference: "default", stencil: 0, xr_compatible: 0'
-            )
-        else:
-            assert len(edges) == 26
-            for j in range(0, len(edges)):
-                assert edges[j]['edge type'] == 'webapi call'
-                assert edges[j]['key'] == node_order[i]
-                assert edges[j]['args'] == get_parameter_args[j]
+        if len(edges) == 2:
+            # this can be either getExtension or getParameter to webgl2
+            for i in range(0, len(edges)):
+                assert edges[i]['edge type'] == 'webapi call'
+                assert edges[i]['key'] == 'WebGLRenderingContext.getExtension'
+                try:
+                    pos = get_extension_args.index(edges[i]['args'])
+                except ValueError:
+                    assert False
 
-        i += 1
+                del get_extension_args[pos]
+        elif len(edges) == 36:
+            # getShaderPrecisionFormat
+            for i in range(0, len(edges)):
+                assert edges[i]['edge type'] == 'webapi call'
+                assert edges[i]['key'] == 'WebGLRenderingContext.getShaderPrecisionFormat'
+                try:
+                    pos = shader_args.index(edges[i]['args'])
+                except ValueError:
+                    assert False
+
+                del shader_args[pos]
+
+        elif len(edges) == 1:
+            # getContext
+            assert edges[0]['edge type'] == 'webapi call'
+            assert edges[0]['key'] == 'HTMLCanvasElement.getContext'
+            assert edges[0]['args'].startswith('webgl')
+        elif len(edges) == 26:
+            # getParameter to webgl
+            for i in range(0, len(edges)):
+                assert edges[i]['edge type'] == 'webapi call'
+                assert edges[i]['key'] == 'WebGLRenderingContext.getParameter'
+                try:
+                    pos = get_parameter_args.index(edges[i]['args'])
+                except ValueError:
+                    assert False
+
+                del get_parameter_args[pos]
+        else:
+            # something went bad
+            assert False
 
     # result edges...
-    expected_result_shader = [
-        'rangeMin: 127, rangeMax: 127, precision: 23',
-        'rangeMin: 127, rangeMax: 127, precision: 23',
-        'rangeMin: 127, rangeMax: 127, precision: 23',
-        'rangeMin: 127, rangeMax: 127, precision: 23',
-        'rangeMin: 127, rangeMax: 127, precision: 23',
-        'rangeMin: 127, rangeMax: 127, precision: 23',
-        'rangeMin: 127, rangeMax: 127, precision: 23',
-        'rangeMin: 127, rangeMax: 127, precision: 23',
-        'rangeMin: 127, rangeMax: 127, precision: 23',
-        'rangeMin: 127, rangeMax: 127, precision: 23',
-        'rangeMin: 127, rangeMax: 127, precision: 23',
-        'rangeMin: 127, rangeMax: 127, precision: 23',
-        'rangeMin: 127, rangeMax: 127, precision: 23',
-        'rangeMin: 127, rangeMax: 127, precision: 23',
-        'rangeMin: 127, rangeMax: 127, precision: 23',
-        'rangeMin: 127, rangeMax: 127, precision: 23',
-        'rangeMin: 127, rangeMax: 127, precision: 23',
-        'rangeMin: 127, rangeMax: 127, precision: 23',
-        'rangeMin: 31, rangeMax: 30, precision: 0',
-        'rangeMin: 31, rangeMax: 30, precision: 0',
-        'rangeMin: 31, rangeMax: 30, precision: 0',
-        'rangeMin: 31, rangeMax: 30, precision: 0',
-        'rangeMin: 31, rangeMax: 30, precision: 0',
-        'rangeMin: 31, rangeMax: 30, precision: 0',
-        'rangeMin: 31, rangeMax: 30, precision: 0',
-        'rangeMin: 31, rangeMax: 30, precision: 0',
-        'rangeMin: 31, rangeMax: 30, precision: 0',
-        'rangeMin: 31, rangeMax: 30, precision: 0',
-        'rangeMin: 31, rangeMax: 30, precision: 0',
-        'rangeMin: 31, rangeMax: 30, precision: 0',
-        'rangeMin: 31, rangeMax: 30, precision: 0',
-        'rangeMin: 31, rangeMax: 30, precision: 0',
-        'rangeMin: 31, rangeMax: 30, precision: 0',
-        'rangeMin: 31, rangeMax: 30, precision: 0',
-        'rangeMin: 31, rangeMax: 30, precision: 0',
-        'rangeMin: 31, rangeMax: 30, precision: 0',
-    ]
-
-    expected_result_get_parameter = [
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-        None,
-        'WebKit WebGL',
-        'WebGL GLSL ES 1.0 (OpenGL ES GLSL ES 1.0 Chromium)',
-        None,
-        'WebKit',
-        'WebGL 1.0 (OpenGL ES 2.0 Chromium)',
-        'Google Inc.',
-        'Google SwiftShader',
-        None,
-    ]
-
-    i = 0
     for node in all_nodes_unique:
         edges = pg_edges_data_from_to(page_graph, node, executing_node)
-        if i == 0:
-            assert len(edges) == 2
-            for j in range(0, len(edges)):
-                # we can't convert the result values to strings...
-                assert len(edges[j]) == 2
-                assert edges[j]['edge type'] == 'webapi result'
-                assert edges[j]['key'] == node_order[i]
-        elif i == 1:
-            assert len(edges) == 36
-            for j in range(0, len(edges)):
-                assert edges[j]['edge type'] == 'webapi result'
-                assert edges[j]['key'] == node_order[i]
-                assert edges[j]['value'] == expected_result_shader[j]
-        elif i == 2:
-            assert len(edges) == 1
+        if len(edges) == 2:
+            # this can be either getExtension or getParameter to webgl2
+            for i in range(0, len(edges)):
+                assert edges[i]['edge type'] == 'webapi result'
+                edges[i]['key'] == 'WebGLRenderingContext.getExtension'
+        elif len(edges) == 36:
+            # getShaderPrecisionFormat
+            for i in range(0, len(edges)):
+                assert edges[i]['edge type'] == 'webapi result'
+                assert edges[i]['key'] == 'WebGLRenderingContext.getShaderPrecisionFormat'
+        elif len(edges) == 1:
+            # getContext
             assert edges[0]['edge type'] == 'webapi result'
-            assert edges[0]['key'] == node_order[i]
-            assert edges[0]['value'] == 'CanvasRenderingContext: webgl'
+            assert edges[0]['key'] == 'HTMLCanvasElement.getContext'
+        elif len(edges) == 26:
+            # getParameter to webgl
+            for i in range(0, len(edges)):
+                assert edges[i]['edge type'] == 'webapi result'
+                assert edges[i]['key'] == 'WebGLRenderingContext.getParameter'
         else:
-            assert len(edges) == 26
-            for j in range(0, len(edges)):
-                assert edges[j]['edge type'] == 'webapi result'
-                assert edges[j]['key'] == node_order[i]
-                if expected_result_get_parameter[j] != None:
-                    assert edges[j]['value'] == expected_result_get_parameter[j]
-                else:
-                    assert len(edges[j]) == 2
-
-        i += 1
+            # something went bad
+            assert False
