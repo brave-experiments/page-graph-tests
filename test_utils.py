@@ -123,6 +123,10 @@ def _do_pg_node_checks(pg, nodes, node_checks):
                 e[1] = node
                 break
 
+    # Assert that all checks succeeded.
+    for k, v in node_checks.items():
+        assert v[1] != None
+
 def pg_node_check_successors(pg, pg_node, node_checks):
     _do_pg_node_checks(pg, pg.successors(pg_node), node_checks)
 
@@ -158,17 +162,18 @@ def generate_html_element_id_selector(node_id):
         return False
     return selector_prototype
 
-def pg_find_html_element_node(pg, tag_name, selector):
-    script_nodes = []
-    for n, e in pg.nodes(data=True):
-        if e['node type'] == 'html node' and e['tag name'] == tag_name:
-            script_nodes.append(n)
-
+def pg_find_node(pg, node_type, selector=lambda pg, n: True):
     ret = []
-    for n in script_nodes:
-        if selector(pg, n):
+    for n, e in pg.nodes(data=True):
+        if e["node type"] == node_type and selector(pg, n):
             ret.append(n)
     return ret
+
+def pg_find_html_element_node(pg, tag_name, selector=lambda pg, n: True):
+    return pg_find_node(pg, "html node",
+            selector=lambda pg, n:
+                pg.nodes(data=True)[n]["tag name"] == tag_name and \
+                selector(pg, n))
 
 def pg_node_id_mapping(pg):
     ret = {}
