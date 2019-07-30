@@ -38,7 +38,7 @@ def test(page_graph, html, tab):
     s = list(page_graph.successors(s))
     assert len(s) == 2
     for node in s:
-        assert page_graph_nodes[node]['node type'] == 'dom root'
+        assert page_graph_nodes[node]['node type'] == 'DOM root'
 
     # Check successors of |remote_iframe_node|.
     #
