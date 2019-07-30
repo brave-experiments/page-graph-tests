@@ -28,23 +28,30 @@ def test(page_graph, html, tab):
 
     # Check successors of |local_iframe_node|.
     s = list(page_graph.successors(local_iframe_node))
-    assert len(s) == 1
-    s = s[0]
-    assert page_graph_nodes[s]['node type'] == 'local frame'
-
-    # Check that we have both the empty-frame DOM root that |local_iframe_node|
-    # is initialized with as well as the DOM root it gets when the static page
-    # loads.
-    s = list(page_graph.successors(s))
-    assert len(s) == 2
-    for node in s:
-        assert page_graph_nodes[node]['node type'] == 'DOM root'
+    assert len(s) == 3
+    # Check that we have the empty-frame DOM root that |local_iframe_node| is
+    # initialized with.
+    assert page_graph_nodes[s[0]]['node type'] == 'DOM root'
+    assert page_graph_nodes[s[0]]['url'] == 'about:blank'
+    # Check that we have the DOM root it gets when the local page loads.
+    assert page_graph_nodes[s[1]]['node type'] == 'DOM root'
+    assert page_graph_nodes[s[1]]['url'].endswith('/static_page.html')
+    # Check that we have the remote frame it gets when the remote page loads
+    # (after swapping frame srcs).
+    assert page_graph_nodes[s[2]]['node type'] == 'remote frame'
+    assert page_graph_nodes[s[2]]['url'] == 'https://example.com/'
 
     # Check successors of |remote_iframe_node|.
-    #
-    # We have no control how many content frames will be created
-    # when we visit, say, google.com. So the below just checks
-    # that all frame nodes are remote, and that they have no children.
-    for s in list(page_graph.successors(remote_iframe_node)):
-        assert page_graph_nodes[s]['node type'] == 'remote frame'
-        assert len(list(page_graph.successors(s))) == 0
+    s = list(page_graph.successors(remote_iframe_node))
+    assert len(s) == 3
+    # Check that we have the empty-frame DOM root that |remote_iframe_node| is
+    # initialized with.
+    assert page_graph_nodes[s[0]]['node type'] == 'DOM root'
+    assert page_graph_nodes[s[0]]['url'] == 'about:blank'
+    # Check that we have the remote frame it gets when the static page loads.
+    assert page_graph_nodes[s[1]]['node type'] == 'remote frame'
+    assert page_graph_nodes[s[1]]['url'] == 'https://example.com/'
+    # Check that we have the DOM root it gets when the local page loads (after
+    # swapping frame srcs).
+    assert page_graph_nodes[s[2]]['node type'] == 'DOM root'
+    assert page_graph_nodes[s[2]]['url'].endswith('/static_page.html')

@@ -152,7 +152,7 @@ def generate_html_element_id_selector(node_id):
         for p in pg.predecessors(n):
             for e, d in pg[p][n].items():
                 if (
-                    d['edge type'] == 'attr set'
+                    d['edge type'] == 'set attribute'
                     and 'key' in d
                     and d['key'] == 'id'
                     and 'value' in d
@@ -162,16 +162,19 @@ def generate_html_element_id_selector(node_id):
         return False
     return selector_prototype
 
-def pg_find_node(pg, node_type, selector=lambda pg, n: True):
+def pg_find_node(pg, node_types, selector=lambda pg, n: True):
     ret = []
+    if isinstance(node_types, str):
+        node_types = {node_types}
     for n, e in pg.nodes(data=True):
         if "node type" in e and \
-                e["node type"] == node_type and selector(pg, n):
+                e["node type"] in node_types and selector(pg, n):
             ret.append(n)
     return ret
 
 def pg_find_html_element_node(pg, tag_name, selector=lambda pg, n: True):
-    return pg_find_node(pg, "HTML element",
+    html_element_node_types = {'HTML element', 'DOM root', 'frame owner'}
+    return pg_find_node(pg, html_element_node_types,
             selector=lambda pg, n:
                 pg.nodes(data=True)[n]["tag name"] == tag_name and \
                 selector(pg, n))
