@@ -92,7 +92,7 @@ def pg_enumerate_xpaths(pg, top_dom_root, cross_dom=False):
 def pg_top_document_root(pg):
     dom_roots = set()
     for n, d in pg.nodes(data=True):
-        if 'node type' in d and d['node type'] == 'dom root' and pg[n]:
+        if 'node type' in d and d['node type'] == 'DOM root' and pg[n]:
             dom_roots.add(n)
 
     # The top document root should have no predecessor other
@@ -165,7 +165,8 @@ def generate_html_element_id_selector(node_id):
 def pg_find_node(pg, node_type, selector=lambda pg, n: True):
     ret = []
     for n, e in pg.nodes(data=True):
-        if e["node type"] == node_type and selector(pg, n):
+        if "node type" in e and \
+                e["node type"] == node_type and selector(pg, n):
             ret.append(n)
     return ret
 

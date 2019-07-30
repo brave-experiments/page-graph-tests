@@ -5,7 +5,6 @@
 # obtain one at http://mozilla.org/MPL/2.0/.
 
 from test_utils import (
-    pg_top_document_root,
     pg_find_html_element_node,
     pg_find_static_node,
     pg_edges_data_from_to,
@@ -13,7 +12,6 @@ from test_utils import (
 )
 
 def test(page_graph, html, tab):
-    top_dom_root = pg_top_document_root(page_graph)
     script_nodes = pg_find_html_element_node(
         page_graph, 'script', generate_script_text_selector('document.cookie')
     )
@@ -37,28 +35,20 @@ def test(page_graph, html, tab):
     assert len(script_to_cookie_edges) == 3
 
     expected_structure_script_to_cookie = [
-        {'key': 'awesomeKey', 'edge type': 'storage set', 'value': 'awesomeValue'},
-        {'key': 'anotherKey', 'edge type': 'storage set', 'value': 'anotherValue'},
-        {'key': 'http://localhost:8080/storage_cookie.html', 'edge type': 'storage read call'},
+        {'key': 'awesomeKey', 'value': 'awesomeValue'},
+        {'key': 'anotherKey', 'value': 'anotherValue'},
+        {'key': 'http://localhost:8080/storage_cookie.html'},
     ]
 
     # verify the script->cookie set edges contain the correct data
     for i in range(2):
         assert script_to_cookie_edges[i]['key'] == expected_structure_script_to_cookie[i]['key']
         assert (
-            script_to_cookie_edges[i]['edge type']
-            == expected_structure_script_to_cookie[i]['edge type']
-        )
-        assert (
             script_to_cookie_edges[i]['value'] == expected_structure_script_to_cookie[i]['value']
         )
 
     # verify the script->cookie read call edge contain the correct data
     assert script_to_cookie_edges[2]['key'] == expected_structure_script_to_cookie[2]['key']
-    assert (
-        script_to_cookie_edges[2]['edge type']
-        == expected_structure_script_to_cookie[2]['edge type']
-    )
 
     cookie_to_script_edge = pg_edges_data_from_to(page_graph, storage_node, execute_script_node)
 
@@ -68,15 +58,10 @@ def test(page_graph, html, tab):
     expected_structure_cookie_to_script = [
         {
             'key': 'http://localhost:8080/storage_cookie.html',
-            'edge type': 'storage read result',
             'value': 'awesomeKey=awesomeValue; anotherKey=anotherValue',
         }
     ]
 
     # check the structure...
     assert cookie_to_script_edge[0]['key'] == expected_structure_cookie_to_script[0]['key']
-    assert (
-        cookie_to_script_edge[0]['edge type']
-        == expected_structure_cookie_to_script[0]['edge type']
-    )
     assert cookie_to_script_edge[0]['value'] == expected_structure_cookie_to_script[0]['value']

@@ -60,7 +60,7 @@ def test(page_graph, html, tab):
     # check so all the nodes directly reachable from each script goes to the correct canvas node
     executing_node_to_data_url = successors_to_data_url[1]
     canvas_to_data_url_node = pg_nodes_directly_reachable_from_with_edge_type(
-        page_graph, executing_node_to_data_url, 'webapi call'
+        page_graph, executing_node_to_data_url, 'web API call'
     )
     # should be two, one edge to the 'getContext' call, and one for the 'toDataURL' node
     assert len(canvas_to_data_url_node) == 2
@@ -70,7 +70,7 @@ def test(page_graph, html, tab):
     )
     assert len(edge_get_context) == 1
     edge_get_context = edge_get_context[0]
-    assert edge_get_context['edge type'] == 'webapi call'
+    assert edge_get_context['edge type'] == 'web API call'
     assert edge_get_context['key'] == 'HTMLCanvasElement.getContext'
     assert (
         edge_get_context['args']
@@ -82,26 +82,26 @@ def test(page_graph, html, tab):
     )
     assert len(edge_to_data_url) == 1
     edge_to_data_url = edge_to_data_url[0]
-    assert edge_to_data_url['edge type'] == 'webapi call'
+    assert edge_to_data_url['edge type'] == 'web API call'
     assert edge_to_data_url['key'] == 'HTMLCanvasElement.toDataURL'
     assert edge_to_data_url['args'] == 'image/jpeg, 0.500000'
 
     executing_node_to_blob = successors_to_blob[1]
     canvas_to_blob_node = pg_nodes_directly_reachable_from_with_edge_type(
-        page_graph, executing_node_to_blob, 'webapi call'
+        page_graph, executing_node_to_blob, 'web API call'
     )
     assert len(canvas_to_blob_node) == 2
 
     edges = pg_edges_data_from_to(page_graph, executing_node_to_blob, canvas_to_blob_node[1])
     assert len(edges) == 1
     edge = edges[0]
-    assert edge['edge type'] == 'webapi call'
+    assert edge['edge type'] == 'web API call'
     assert edge['key'] == 'HTMLCanvasElement.toBlob'
     assert edge['args'] == 'V8BlobCallback, image/png, -1.000000'
 
     executing_node_measure_text = successors_measure_text[1]
     canvas_measure_text_node = pg_nodes_directly_reachable_from_with_edge_type(
-        page_graph, executing_node_measure_text, 'webapi call'
+        page_graph, executing_node_measure_text, 'web API call'
     )
     assert len(canvas_measure_text_node) == 2
 
@@ -110,13 +110,13 @@ def test(page_graph, html, tab):
     )
     assert len(edges) == 1
     edge = edges[0]
-    assert edge['edge type'] == 'webapi call'
+    assert edge['edge type'] == 'web API call'
     assert edge['key'] == 'CanvasRenderingContext2D.measureText'
     assert edge['args'] == 'Hello world'
 
     executing_node_is_point_in_path = successors_is_point_in_path[1]
     canvas_is_point_in_path_node = pg_nodes_directly_reachable_from_with_edge_type(
-        page_graph, executing_node_is_point_in_path, 'webapi call'
+        page_graph, executing_node_is_point_in_path, 'web API call'
     )
 
     assert len(canvas_is_point_in_path_node) == 1
@@ -126,7 +126,7 @@ def test(page_graph, html, tab):
     )
     assert len(edges) == 1
     edge = edges[0]
-    assert edge['edge type'] == 'webapi call'
+    assert edge['edge type'] == 'web API call'
     assert edge['key'] == 'CanvasRenderingContext2D.isPointInPath'
     assert edge['args'] == '5.000000, 5.000000, evenodd'
 
@@ -136,7 +136,7 @@ def test(page_graph, html, tab):
     )
     assert len(edges) == 1
     edge = edges[0]
-    assert edge['edge type'] == 'webapi result'
+    assert edge['edge type'] == 'web API result'
     assert edge['key'] == 'HTMLCanvasElement.getContext'
     assert edge['value'] == 'CanvasRenderingContext: 2d'
 
@@ -145,7 +145,7 @@ def test(page_graph, html, tab):
     )
     assert len(edges) == 1
     edge = edges[0]
-    assert edge['edge type'] == 'webapi result'
+    assert edge['edge type'] == 'web API result'
     assert edge['key'] == 'HTMLCanvasElement.toDataURL'
     assert edge['value'].startswith('data:image/jpeg;base64,')
 
@@ -157,7 +157,7 @@ def test(page_graph, html, tab):
     )
     assert len(edges) == 1
     edge = edges[0]
-    assert edge['edge type'] == 'webapi result'
+    assert edge['edge type'] == 'web API result'
     assert edge['key'] == 'CanvasRenderingContext2D.measureText'
     assert edge['value'].startswith('width: ')
 
@@ -166,6 +166,6 @@ def test(page_graph, html, tab):
     )
     assert len(edges) == 1
     edge = edges[0]
-    assert edge['edge type'] == 'webapi result'
+    assert edge['edge type'] == 'web API result'
     assert edge['key'] == 'CanvasRenderingContext2D.isPointInPath'
     assert edge['value'] == 'false'

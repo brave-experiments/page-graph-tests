@@ -37,7 +37,7 @@ def test(page_graph, html, tab):
         'NavigatorID.platform',
     ]
     for i in range(0, len(all_navigator_nodes)):
-        assert pg_get_node_data(page_graph, all_navigator_nodes[i])['node type'] == node_order[i]
+        assert pg_get_node_data(page_graph, all_navigator_nodes[i])['method'] == node_order[i]
 
     # check the call edges
     for i in range(0, len(all_navigator_nodes)):
@@ -47,7 +47,7 @@ def test(page_graph, html, tab):
         edge = edges[0]
         # should be exactly 2 keys since there's no arguments
         assert len(edge) == 2
-        assert edge['edge type'] == 'webapi call'
+        assert edge['edge type'] == 'web API call'
         assert edge['key'] == node_order[i]
 
     # check the result edges
@@ -65,7 +65,7 @@ def test(page_graph, html, tab):
         # should only be one result edge from each navigator node
         assert len(edges) == 1
         edge = edges[0]
-        assert edge['edge type'] == 'webapi result'
+        assert edge['edge type'] == 'web API result'
         assert edge['key'] == node_order[i]
         if result_validators[i]:
             # should be exactly 3 keys (type, key and value)

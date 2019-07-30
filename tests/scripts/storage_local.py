@@ -5,7 +5,6 @@
 # obtain one at http://mozilla.org/MPL/2.0/.
 
 from test_utils import (
-    pg_top_document_root,
     pg_find_html_element_node,
     pg_find_static_node,
     pg_edges_data_from_to,
@@ -13,7 +12,6 @@ from test_utils import (
 )
 
 def test(page_graph, html, tab):
-    top_dom_root = pg_top_document_root(page_graph)
     script_nodes = pg_find_html_element_node(
         page_graph, 'script', generate_script_text_selector('localStorage')
     )
@@ -37,27 +35,21 @@ def test(page_graph, html, tab):
     assert len(edges_script_to_local) == 5
 
     expected_structure_script_to_local = [
-        {'key': 'myCat', 'edge type': 'storage set', 'value': 'Tom'},
-        {'key': 'myMouse', 'edge type': 'storage set', 'value': 'Jerry'},
-        {'key': 'myCat', 'edge type': 'storage read call'},
-        {'key': 'myCat', 'edge type': 'storage delete'},
-        {'edge type': 'storage clear'},
+        {'key': 'myCat', 'value': 'Tom'},
+        {'key': 'myMouse', 'value': 'Jerry'},
+        {'key': 'myCat'},
+        {'key': 'myCat'},
+        {},
     ]
 
     # verify the edges contain the correct data
     for i in range(len(edges_script_to_local)):
-        # edge types and keys should always be the same
-        assert (
-            edges_script_to_local[i]['edge type']
-            == expected_structure_script_to_local[i]['edge type']
-        )
-
         # all but storage clear have defined keys
-        if edges_script_to_local[i]['edge type'] != 'storage clear':
+        if i != len(edges_script_to_local) - 1:
             assert edges_script_to_local[i]['key'] == expected_structure_script_to_local[i]['key']
 
         # set edges also have a value
-        if edges_script_to_local[i]['edge type'] == 'storage set':
+        if i < 2:
             assert (
                 edges_script_to_local[i]['value'] == expected_structure_script_to_local[i]['value']
             )
@@ -69,12 +61,9 @@ def test(page_graph, html, tab):
     assert len(edges_local_to_script) == 1
 
     expected_structure_local_to_script = [
-        {'key': 'myCat', 'edge type': 'storage read result', 'value': 'Tom'}
+        {'key': 'myCat', 'value': 'Tom'}
     ]
 
     # check the edge
     assert edges_local_to_script[0]['key'] == expected_structure_local_to_script[0]['key']
-    assert (
-        edges_local_to_script[0]['edge type'] == expected_structure_local_to_script[0]['edge type']
-    )
     assert edges_local_to_script[0]['value'] == expected_structure_local_to_script[0]['value']

@@ -27,7 +27,7 @@ def test(page_graph, html, tab):
     html_script_node_checks = {
         'parser': [lambda x: page_graph_nodes[x]['node type'] == 'parser', None],
         'body': [
-            lambda x: page_graph_nodes[x]['node type'] == 'html node'
+            lambda x: page_graph_nodes[x]['node type'] == 'HTML element'
             and page_graph_nodes[x]['tag name'] == 'body',
             None,
         ],

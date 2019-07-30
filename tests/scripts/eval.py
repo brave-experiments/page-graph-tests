@@ -40,7 +40,7 @@ def test(page_graph, html, tab):
     html_script_node_checks = {
         'parser': [lambda x: page_graph_nodes[x]['node type'] == 'parser', None],
         'body': [
-            lambda x: page_graph_nodes[x]['node type'] == 'html node'
+            lambda x: page_graph_nodes[x]['node type'] == 'HTML element'
             and page_graph_nodes[x]['tag name'] == 'body',
             None,
         ],
@@ -65,13 +65,13 @@ def test(page_graph, html, tab):
                     break
             insert_edges = []
             for e, d in page_graph[pn][eval_script_text_node].items():
-                if d['edge type'] != 'insert':
+                if d['edge type'] != 'insert node':
                     continue
                 parent_id = d['parent']
                 assert parent_id in id_mapping
                 p = id_mapping[parent_id]
                 if (
-                    page_graph_nodes[p]['node type'] == 'html node'
+                    page_graph_nodes[p]['node type'] == 'HTML element'
                     and page_graph_nodes[p]['tag name'] == '#document-fragment'
                 ):
                     continue
@@ -84,7 +84,7 @@ def test(page_graph, html, tab):
     assert len(predecessors) == 2
     eval_script_node_checks = {
         'body': [
-            lambda x: page_graph_nodes[x]['node type'] == 'html node'
+            lambda x: page_graph_nodes[x]['node type'] == 'HTML element'
             and page_graph_nodes[x]['tag name'] == 'body',
             None,
         ],
