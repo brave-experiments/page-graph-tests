@@ -171,7 +171,7 @@ def pg_find_node(pg, node_type, selector=lambda pg, n: True):
     return ret
 
 def pg_find_html_element_node(pg, tag_name, selector=lambda pg, n: True):
-    return pg_find_node(pg, "html node",
+    return pg_find_node(pg, "HTML element",
             selector=lambda pg, n:
                 pg.nodes(data=True)[n]["tag name"] == tag_name and \
                 selector(pg, n))
