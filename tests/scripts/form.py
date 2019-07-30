@@ -44,11 +44,11 @@ def test(page_graph, html, tab):
     )[0]
     successors = list(page_graph.successors(event_function_node))
     assert len(successors) == 2  # the text node, and a script node
-    actual_function_node = successors[1]
+    #actual_function_node = successors[1]
 
     # form has an edge from itself to the event handler
     assert form == pg_edge_out(event_edge_out)
-    assert actual_function_node == pg_edge_in(event_edge_out)
+    #assert actual_function_node == pg_edge_in(event_edge_out)
 
     # it should be the same event listener id on the two edges
     assert pg_edge_data(event_edge_in, 'event listener id') == pg_edge_data(
