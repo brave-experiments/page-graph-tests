@@ -23,7 +23,8 @@ def test(page_graph, html, tab):
 	successors = list(page_graph.successors(html_link_node))
 	assert len(successors) == 1
 	html_link_node_checks = {
-			"css": [ lambda x: page_graph_nodes[x]["node type"] == "resource" \
+			"css": [ lambda x: "node type" in page_graph_nodes[x]
+				and page_graph_nodes[x]["node type"] == "resource" \
 				and "url" in page_graph_nodes[x] \
 				and page_graph_nodes[x]["url"].endswith("css_image.css"), None
 			]

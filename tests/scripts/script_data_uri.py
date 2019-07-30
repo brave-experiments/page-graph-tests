@@ -19,7 +19,8 @@ def test(page_graph, html, tab):
 
     div_node = div_nodes[0]
 
-    div_create_nodes = pg_nodes_directly_leading_to_with_edge_type(page_graph, div_node, 'create')
+    div_create_nodes = pg_nodes_directly_leading_to_with_edge_type(
+            page_graph, div_node, 'create node')
     assert len(div_create_nodes) == 1
 
     data_uri_script_node = div_create_nodes[0]
@@ -31,11 +32,11 @@ def test(page_graph, html, tab):
     assert len(data_uri_script_execute_nodes) == 1
 
     data_uri_script_elem_node = data_uri_script_execute_nodes[0]
-    assert page_graph.nodes[data_uri_script_elem_node]['node type'] == 'html node'
+    assert page_graph.nodes[data_uri_script_elem_node]['node type'] == 'HTML element'
     assert page_graph.nodes[data_uri_script_elem_node]['tag name'] == 'script'
 
     data_uri_script_elem_attr_set_edges = pg_edges_directly_leading_to_with_edge_type(
-        page_graph, data_uri_script_elem_node, 'attr set'
+        page_graph, data_uri_script_elem_node, 'set attribute'
     )
     assert len(data_uri_script_elem_attr_set_edges) == 1
 

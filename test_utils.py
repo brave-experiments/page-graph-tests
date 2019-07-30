@@ -165,12 +165,13 @@ def generate_html_element_id_selector(node_id):
 def pg_find_node(pg, node_type, selector=lambda pg, n: True):
     ret = []
     for n, e in pg.nodes(data=True):
-        if e["node type"] == node_type and selector(pg, n):
+        if "node type" in e and \
+                e["node type"] == node_type and selector(pg, n):
             ret.append(n)
     return ret
 
 def pg_find_html_element_node(pg, tag_name, selector=lambda pg, n: True):
-    return pg_find_node(pg, "html node",
+    return pg_find_node(pg, "HTML element",
             selector=lambda pg, n:
                 pg.nodes(data=True)[n]["tag name"] == tag_name and \
                 selector(pg, n))
