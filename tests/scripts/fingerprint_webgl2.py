@@ -105,7 +105,7 @@ def test(page_graph, html, tab):
         if len(edges) == 2:
             # this can be either getExtension or getParameter to webgl2
             for i in range(0, len(edges)):
-                assert edges[i]['edge type'] == 'web API call'
+                assert edges[i]['edge type'] == 'js call'
                 assert (
                     edges[i]['key'] == 'WebGL2RenderingContext.getParameter'
                     or edges[i]['key'] == 'WebGLRenderingContext.getExtension'
@@ -127,7 +127,7 @@ def test(page_graph, html, tab):
         elif len(edges) == 36:
             # getShaderPrecisionFormat
             for i in range(0, len(edges)):
-                assert edges[i]['edge type'] == 'web API call'
+                assert edges[i]['edge type'] == 'js call'
                 assert edges[i]['key'] == 'WebGLRenderingContext.getShaderPrecisionFormat'
                 try:
                     pos = shader_args.index(edges[i]['args'])
@@ -138,13 +138,13 @@ def test(page_graph, html, tab):
 
         elif len(edges) == 1:
             # getContext
-            assert edges[0]['edge type'] == 'web API call'
+            assert edges[0]['edge type'] == 'js call'
             assert edges[0]['key'] == 'HTMLCanvasElement.getContext'
             assert edges[0]['args'].startswith('webgl2')
         elif len(edges) == 24:
             # getParameter to webgl
             for i in range(0, len(edges)):
-                assert edges[i]['edge type'] == 'web API call'
+                assert edges[i]['edge type'] == 'js call'
                 assert edges[i]['key'] == 'WebGLRenderingContext.getParameter'
                 try:
                     pos = get_parameter_args.index(edges[i]['args'])
@@ -162,7 +162,7 @@ def test(page_graph, html, tab):
         if len(edges) == 2:
             # this can be either getExtension or getParameter to webgl2
             for i in range(0, len(edges)):
-                assert edges[i]['edge type'] == 'web API result'
+                assert edges[i]['edge type'] == 'js result'
                 assert (
                     edges[i]['key'] == 'WebGL2RenderingContext.getParameter'
                     or edges[i]['key'] == 'WebGLRenderingContext.getExtension'
@@ -170,16 +170,16 @@ def test(page_graph, html, tab):
         elif len(edges) == 36:
             # getShaderPrecisionFormat
             for i in range(0, len(edges)):
-                assert edges[i]['edge type'] == 'web API result'
+                assert edges[i]['edge type'] == 'js result'
                 assert edges[i]['key'] == 'WebGLRenderingContext.getShaderPrecisionFormat'
         elif len(edges) == 1:
             # getContext
-            assert edges[0]['edge type'] == 'web API result'
+            assert edges[0]['edge type'] == 'js result'
             assert edges[0]['key'] == 'HTMLCanvasElement.getContext'
         elif len(edges) == 24:
             # getParameter to webgl
             for i in range(0, len(edges)):
-                assert edges[i]['edge type'] == 'web API result'
+                assert edges[i]['edge type'] == 'js result'
                 assert edges[i]['key'] == 'WebGLRenderingContext.getParameter'
         else:
             # something went bad
