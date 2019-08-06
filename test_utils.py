@@ -59,22 +59,27 @@ def pg_enumerate_xpaths_with_action(pg, pg_node, parent_xpath, action, cross_dom
     is_leaf = True
 
     for pg_child in pg_children:
-        if not 'tag name' in pg_nodes[pg_child]:
-            if (
-                cross_dom
-                and 'node type' in pg_nodes[pg_child]
-                and pg_nodes[pg_child]['node type'] == 'local frame'
-            ):
+        if pg_nodes[pg_child]["node type"] == "frame owner":
+            child_xpath = current_xpath + "/{0}".format(
+                    pg_nodes[pg_child]["tag name"])
+            if cross_dom:
                 pg_grandchildren = list(pg[pg_child].keys())
-                assert len(pg_grandchildren) == 2  # includes initial empty doc
-                # pg_grandchildren[0] is the dom root node.
+                # Includes initial empty doc.
+                assert len(pg_grandchildren) == 2
+                # |pg_grandchildren[0]| is the empty doc.
+                assert "url" in pg_nodes[pg_grandchildren[0]] and \
+                        pg_nodes[pg_grandchildren[0]]["url"] == "about:blank"
+
                 pg_enumerate_xpaths_with_action(
-                    pg, _dom_root_html(pg, pg_grandchildren[1]), current_xpath, action, True
-                )
+                        pg, _dom_root_html(pg, pg_grandchildren[1]),
+                        child_xpath, action, True)
             else:
-                continue
-        else:
+                # Child frame owner is a leaf node.
+                action(child_xpath, pg_child)
+        elif pg_nodes[pg_child]["node type"] == "HTML element":
             pg_enumerate_xpaths_with_action(pg, pg_child, current_xpath, action, cross_dom)
+        else:
+            continue
         is_leaf = False
 
     if is_leaf:
