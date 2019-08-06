@@ -44,9 +44,8 @@ def test(page_graph, html, tab):
         assert len(edges) == 1
         edge = edges[0]
         # should be exactly 2 keys since there's no arguments
-        assert len(edge) == 2
+        assert len(edge) == 1
         assert edge['edge type'] == 'js call'
-        assert edge['key'] == node_order[i]
 
     # check the result edges
     for i in range(0, len(all_screen_nodes)):
@@ -55,7 +54,6 @@ def test(page_graph, html, tab):
         assert len(edges) == 1
         edge = edges[0]
         # should be exactly 3 keys (type, key and value)
-        assert len(edge) == 3
+        assert len(edge) == 2
         assert edge['edge type'] == 'js result'
-        assert edge['key'] == node_order[i]
         assert edge['value'] == str(int(edge['value']))
