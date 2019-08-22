@@ -138,7 +138,9 @@ def test(page_graph, html, tab):
     assert edge['args'] == '5.000000, 5.000000, evenodd'
 
     canvas_is_point_in_path_web_api_node = page_graph.node[canvas_is_point_in_path_node[0]]
-    assert canvas_is_point_in_path_web_api_node['method'] == 'CanvasRenderingContext2D.isPointInPath'
+    assert (
+        canvas_is_point_in_path_web_api_node['method'] == 'CanvasRenderingContext2D.isPointInPath'
+    )
 
     # result edges
     edges = pg_edges_data_from_to(

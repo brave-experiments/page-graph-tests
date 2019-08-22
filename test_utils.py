@@ -59,24 +59,25 @@ def pg_enumerate_xpaths_with_action(pg, pg_node, parent_xpath, action, cross_dom
     is_leaf = True
 
     for pg_child in pg_children:
-        if pg_nodes[pg_child]["node type"] == "frame owner":
-            child_xpath = current_xpath + "/{0}".format(
-                    pg_nodes[pg_child]["tag name"])
+        if pg_nodes[pg_child]['node type'] == 'frame owner':
+            child_xpath = current_xpath + '/{0}'.format(pg_nodes[pg_child]['tag name'])
             if cross_dom:
                 pg_grandchildren = list(pg[pg_child].keys())
                 # Includes initial empty doc.
                 assert len(pg_grandchildren) == 2
                 # |pg_grandchildren[0]| is the empty doc.
-                assert "url" in pg_nodes[pg_grandchildren[0]] and \
-                        pg_nodes[pg_grandchildren[0]]["url"] == "about:blank"
+                assert (
+                    'url' in pg_nodes[pg_grandchildren[0]]
+                    and pg_nodes[pg_grandchildren[0]]['url'] == 'about:blank'
+                )
 
                 pg_enumerate_xpaths_with_action(
-                        pg, _dom_root_html(pg, pg_grandchildren[1]),
-                        child_xpath, action, True)
+                    pg, _dom_root_html(pg, pg_grandchildren[1]), child_xpath, action, True
+                )
             else:
                 # Child frame owner is a leaf node.
                 action(child_xpath, pg_child)
-        elif pg_nodes[pg_child]["node type"] == "HTML element":
+        elif pg_nodes[pg_child]['node type'] == 'HTML element':
             pg_enumerate_xpaths_with_action(pg, pg_child, current_xpath, action, cross_dom)
         else:
             continue
@@ -172,17 +173,17 @@ def pg_find_node(pg, node_types, selector=lambda pg, n: True):
     if isinstance(node_types, str):
         node_types = {node_types}
     for n, e in pg.nodes(data=True):
-        if "node type" in e and \
-                e["node type"] in node_types and selector(pg, n):
+        if 'node type' in e and e['node type'] in node_types and selector(pg, n):
             ret.append(n)
     return ret
 
 def pg_find_html_element_node(pg, tag_name, selector=lambda pg, n: True):
     html_element_node_types = {'HTML element', 'DOM root', 'frame owner'}
-    return pg_find_node(pg, html_element_node_types,
-            selector=lambda pg, n:
-                pg.nodes(data=True)[n]["tag name"] == tag_name and \
-                selector(pg, n))
+    return pg_find_node(
+        pg,
+        html_element_node_types,
+        selector=lambda pg, n: pg.nodes(data=True)[n]['tag name'] == tag_name and selector(pg, n),
+    )
 
 def pg_node_id_mapping(pg):
     ret = {}

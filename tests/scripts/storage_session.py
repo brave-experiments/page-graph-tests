@@ -63,9 +63,7 @@ def test(page_graph, html, tab):
     # should be exactly one edge storage->script
     assert len(edges_session_to_script) == 1
 
-    expected_structure_session_to_script = [
-        {'key': 'myCat', 'value': 'Tom'}
-    ]
+    expected_structure_session_to_script = [{'key': 'myCat', 'value': 'Tom'}]
 
     # check the edge
     assert edges_session_to_script[0]['key'] == expected_structure_session_to_script[0]['key']

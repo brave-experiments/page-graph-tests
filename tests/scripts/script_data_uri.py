@@ -20,7 +20,8 @@ def test(page_graph, html, tab):
     div_node = div_nodes[0]
 
     div_create_nodes = pg_nodes_directly_leading_to_with_edge_type(
-            page_graph, div_node, 'create node')
+        page_graph, div_node, 'create node'
+    )
     assert len(div_create_nodes) == 1
 
     data_uri_script_node = div_create_nodes[0]
