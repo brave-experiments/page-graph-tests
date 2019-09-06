@@ -26,16 +26,6 @@ def test(page_graph, html, tab):
     # check so all the nodes directly reachable from the script goes to different screen nodes
     all_screen_nodes = pg_nodes_directly_reachable_from(page_graph, executing_node)
     assert len(all_screen_nodes) == 8
-    node_order = [
-        'Screen.availWidth',
-        'Screen.availHeight',
-        'Screen.width',
-        'Screen.height',
-        'Screen.colorDepth',
-        'Screen.pixelDepth',
-        'Screen.availLeft',
-        'Screen.availTop',
-    ]
 
     # check the call edges
     for i in range(0, len(all_screen_nodes)):
@@ -43,9 +33,10 @@ def test(page_graph, html, tab):
         # should only be one call edge to each screen node
         assert len(edges) == 1
         edge = edges[0]
-        # should be exactly 2 keys since there's no arguments
-        assert len(edge) == 1
+        # should be exactly 3 keys (type, id, timestamp)
+        assert len(edge) == 3
         assert edge['edge type'] == 'js call'
+        assert 'id' in edge and 'timestamp' in edge
 
     # check the result edges
     for i in range(0, len(all_screen_nodes)):
@@ -53,7 +44,8 @@ def test(page_graph, html, tab):
         # should only be one result edge from each screen node
         assert len(edges) == 1
         edge = edges[0]
-        # should be exactly 3 keys (type, key and value)
-        assert len(edge) == 2
+        # should be exactly 4 keys (type, id, timestamp, value)
+        assert len(edge) == 4
         assert edge['edge type'] == 'js result'
         assert edge['value'] == str(int(edge['value']))
+        assert 'id' in edge and 'timestamp' in edge

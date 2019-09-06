@@ -45,9 +45,10 @@ def test(page_graph, html, tab):
         # should only be one call edge to each navigator node
         assert len(edges) == 1
         edge = edges[0]
-        # should be exactly 2 keys since there's no arguments
-        assert len(edge) == 1
+        # should be exactly 3 keys (edge type, id and timestamp)
+        assert len(edge) == 3
         assert edge['edge type'] == 'js call'
+        assert 'id' in edge and 'timestamp' in edge
 
     # check the result edges
     result_validators = [
@@ -66,9 +67,13 @@ def test(page_graph, html, tab):
         edge = edges[0]
         assert edge['edge type'] == 'js result'
         if result_validators[i]:
-            # should be exactly 3 keys (type, key and value)
-            assert len(edge) == 2
+            # should be exactly 4 keys (type, id, timestamp and value)
+            assert len(edge) == 4
             assert result_validators[i](edge['value'])
+            assert 'id' in edge and 'timestamp' in edge
+            assert edge['edge type'] == 'js result'
         else:
-            # should be exactly 2 keys (type, key), since we didn't return a value
-            assert len(edge) == 1
+            # should be exactly 3 keys (type, id, timestamp), since we didn't return a value
+            assert len(edge) == 3
+            assert 'id' in edge and 'timestamp' in edge
+            assert edge['edge type'] == 'js result'
