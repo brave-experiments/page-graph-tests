@@ -1,0 +1,18 @@
+<html>
+    <body>
+        <script>
+            let author;
+            const url = 'https://api.github.com/repos/javascript-tutorial/en.javascript.info/commits';
+            let xhr = new XMLHttpRequest();
+            xhr.open('GET', url);
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === XMLHttpRequest.DONE && xhr.status === 200) {
+                    const commits = JSON.parse(xhr.responseText);
+                    author = commits[0].author.login;
+                }
+            }
+
+            xhr.send();
+        </script>
+    </body>
+</html>

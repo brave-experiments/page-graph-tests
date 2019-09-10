@@ -15,6 +15,7 @@ import sys
 import tempfile
 import traceback
 import urllib.parse
+import time
 
 import aiofiles
 from aiohttp import web
@@ -210,8 +211,11 @@ async def run_test(test_name, brave_exe_path, headless=True):
                 await asyncio.sleep(wait_check_interval)
                 total_time += wait_check_interval
 
-            # Grab and parse the page graph data.
+            # sleep in case we have requests, so they are added properly to the
+            # graph
+            time.sleep(1)
 
+            # Grab and parse the page graph data.
             result = await tab.send_command(
                 (
                     devtools.page.Page.build_send_payload('generatePageGraph', {}),
