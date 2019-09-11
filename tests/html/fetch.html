@@ -1,0 +1,10 @@
+<html>
+    <body>
+        <script>
+            let author;
+            fetch('https://api.github.com/repos/brave/brave-core/commits')
+            .then(response => response.json())
+            .then(commits => author = commits[0].author.login);
+        </script>
+    </body>
+</html>
