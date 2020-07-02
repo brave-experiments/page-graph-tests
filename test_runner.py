@@ -6,6 +6,7 @@
 
 import argparse
 import asyncio
+import errno
 import fnmatch
 import importlib.util
 import logging
@@ -15,15 +16,18 @@ import sys
 import tempfile
 import traceback
 import urllib.parse
-import time
+import warnings
 
 import aiofiles
 from aiohttp import web
-from chromewhip import Chrome
-import chromewhip.protocol as devtools
 import colorama
 from colorama import Fore
 from networkx import graphml
+
+with warnings.catch_warnings():
+    warnings.simplefilter('ignore')
+    from chromewhip import Chrome
+    import chromewhip.protocol as devtools
 
 process_termination_timeout = 10
 
@@ -48,9 +52,16 @@ colorama.init()
 
 # Configure chromewhip logging.
 logging.getLogger('chromewhip.chrome.Chrome').setLevel(logging.ERROR)
+logging.getLogger('aiohttp.web').setLevel(logging.DEBUG)
+logging.getLogger('aiohttp.server').setLevel(logging.DEBUG)
+logging.getLogger('aiohttp.internal').setLevel(logging.DEBUG)
+logging.getLogger('aiohttp.access').setLevel(logging.DEBUG)
 
 async def run_tests(brave_exe_path, test_name_filters=['*'], headless=True):
     # Start web server hosting the test HTML content.
+
+    async def handle_req(request):
+        print(request)
 
     app = web.Application()
     app.add_routes([web.static('/', test_html_dir_path)])
@@ -98,7 +109,8 @@ async def run_test(test_name, brave_exe_path, headless=True):
     test_page_uri = web_server_uri_prefix + urllib.parse.quote(test_page_file_name)
 
     # Use a fresh temporary directory for the browser profile.
-    with tempfile.TemporaryDirectory('brave-tmp-profile') as profile_dir_path:
+    profile_dir = tempfile.TemporaryDirectory('brave-tmp-profile')
+    try:
         # Launch the browser.
 
         brave_args = [
@@ -130,7 +142,7 @@ async def run_test(test_name, brave_exe_path, headless=True):
             '--mute-audio',
             'about:blank',
             '--remote-debugging-port=0',
-            '--user-data-dir=' + profile_dir_path,
+            '--user-data-dir=' + profile_dir.name,
             # Custom Brave options:
             '--v=0',
             '--disable-brave-update',
@@ -211,9 +223,9 @@ async def run_test(test_name, brave_exe_path, headless=True):
                 await asyncio.sleep(wait_check_interval)
                 total_time += wait_check_interval
 
-            # sleep in case we have requests, so they are added properly to the
-            # graph
-            time.sleep(1)
+            # Sleep in case we have requests, so they are added properly to the
+            # graph.
+            await asyncio.sleep(1)
 
             # Grab and parse the page graph data.
             result = await tab.send_command(
@@ -242,7 +254,7 @@ async def run_test(test_name, brave_exe_path, headless=True):
                 # Evaluate the test case, passing in the test page HTML, its
                 # corresponding page graph, and a reference to the open browser tab.
                 test_spec.loader.exec_module(test_module)
-                test_module.test(page_graph, test_page_html, tab)
+                test_module.test(page_graph, test_page_html, tab, headless)
             except BaseException as e:
                 if isinstance(e, AssertionError):
                     print('...' + Fore.RED + 'FAIL' + Fore.RESET)
@@ -297,6 +309,20 @@ async def run_test(test_name, brave_exe_path, headless=True):
                 proc.kill()
 
         return test_succeeded
+    finally:
+        while True:
+            try:
+                profile_dir.cleanup()
+            except OSError as e:
+                if e.errno == errno.ENOTEMPTY:
+                    # Brave subprocesses haven't fully exited yet, and are still
+                    # using the profile directory. Wait a bit and try cleaning
+                    # it up again.
+                    await asyncio.sleep(1)
+                    continue
+                else:
+                    raise
+            break
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Page Graph test suite for the Brave browser.')

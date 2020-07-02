@@ -12,7 +12,7 @@ from test_utils import (
     pg_nodes_directly_reachable_from,
 )
 
-def test(page_graph, html, tab):
+def test(page_graph, html, tab, headless):
     script_nodes = pg_find_html_element_node(
         page_graph, 'script', generate_script_text_selector('screen.')
     )
@@ -30,8 +30,9 @@ def test(page_graph, html, tab):
     # check the call edges
     for i in range(0, len(all_screen_nodes)):
         edges = pg_edges_data_from_to(page_graph, executing_node, all_screen_nodes[i])
-        # should only be one call edge to each screen node
-        assert len(edges) == 1
+        # should at most two call edges to each screen node (`colorDepth` and
+        # `pixelDepth` are synonyms)
+        assert len(edges) >= 1 and len(edges) <= 2
         edge = edges[0]
         # should be exactly 3 keys (type, id, timestamp)
         assert len(edge) == 3
@@ -41,8 +42,8 @@ def test(page_graph, html, tab):
     # check the result edges
     for i in range(0, len(all_screen_nodes)):
         edges = pg_edges_data_from_to(page_graph, all_screen_nodes[i], executing_node)
-        # should only be one result edge from each screen node
-        assert len(edges) == 1
+        # should be at most two result edges from each screen node
+        assert len(edges) >= 1 and len(edges) <= 2
         edge = edges[0]
         # should be exactly 4 keys (type, id, timestamp, value)
         assert len(edge) == 4

@@ -13,7 +13,7 @@ from test_utils import (
     pg_top_document_root,
 )
 
-def test(page_graph, html, tab):
+def test(page_graph, html, tab, headless):
     page_graph_nodes = page_graph.nodes(data=True)
 
     # TODO: Don't rely on xpaths.

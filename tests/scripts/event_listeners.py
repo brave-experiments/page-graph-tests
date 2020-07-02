@@ -6,7 +6,7 @@
 
 from test_utils import pg_edge_data, pg_edge_in, pg_edge_out, pg_find_html_element_node
 
-def test(page_graph, html, tab):
+def test(page_graph, html, tab, headless):
     div_node = pg_find_html_element_node(page_graph, 'div', lambda page_graph, node: True)[0]
 
     relevant_edge_types = {'add event listener', 'remove event listener'}

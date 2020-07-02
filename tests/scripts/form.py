@@ -13,7 +13,7 @@ from test_utils import (
     pg_get_node_data,
 )
 
-def test(page_graph, html, tab):
+def test(page_graph, html, tab, headless):
     form = pg_find_html_element_node(page_graph, 'form', lambda page_graph, node: True)[0]
     expected_edge_type = 'add event listener'
     event_edge_in = [

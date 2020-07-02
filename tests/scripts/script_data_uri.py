@@ -13,7 +13,7 @@ from test_utils import (
     pg_nodes_directly_leading_to_with_edge_type,
 )
 
-def test(page_graph, html, tab):
+def test(page_graph, html, tab, headless):
     div_nodes = pg_find_html_element_node(page_graph, 'div', lambda page_graph, node: True)
     assert len(div_nodes) == 1
 

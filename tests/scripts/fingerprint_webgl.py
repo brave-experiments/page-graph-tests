@@ -12,7 +12,7 @@ from test_utils import (
     pg_nodes_directly_reachable_from,
 )
 
-def test(page_graph, html, tab):
+def test(page_graph, html, tab, headless):
     script_nodes = pg_find_html_element_node(
         page_graph, 'script', generate_script_text_selector('webgl')
     )

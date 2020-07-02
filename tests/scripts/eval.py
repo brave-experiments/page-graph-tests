@@ -15,7 +15,7 @@ from test_utils import (
     pg_top_document_root,
 )
 
-def test(page_graph, html, tab):
+def test(page_graph, html, tab, headless):
     page_graph_nodes = page_graph.nodes(data=True)
     id_mapping = pg_node_id_mapping(page_graph)
 

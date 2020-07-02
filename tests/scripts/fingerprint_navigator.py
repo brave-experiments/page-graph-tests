@@ -13,7 +13,7 @@ from test_utils import (
     pg_get_node_data,
 )
 
-def test(page_graph, html, tab):
+def test(page_graph, html, tab, headless):
     script_nodes = pg_find_html_element_node(
         page_graph, 'script', generate_script_text_selector('navigator.')
     )
@@ -54,8 +54,8 @@ def test(page_graph, html, tab):
     result_validators = [
         lambda x: x.startswith('Mozilla/5.0 '),
         lambda x: x == 'en-US',
-        lambda x: x == 'en-US',
-        None,
+        lambda x: x.startswith('en-US'),
+        None if headless else (lambda x: 'plugin' in x),
         None,
         lambda x: x == 'true',
         lambda x: x in ['MacIntel', 'Win32', 'Linux x86_64'],

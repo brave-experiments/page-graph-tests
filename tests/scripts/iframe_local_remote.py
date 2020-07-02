@@ -11,7 +11,7 @@ from test_utils import (
     pg_node_check_successors,
 )
 
-def test(page_graph, html, tab):
+def test(page_graph, html, tab, headless):
     page_graph_nodes = page_graph.nodes(data=True)
 
     iframe_nodes = pg_find_html_element_node(
@@ -39,7 +39,7 @@ def test(page_graph, html, tab):
     # Check that we have the remote frame it gets when the remote page loads
     # (after swapping frame srcs).
     assert page_graph_nodes[s[2]]['node type'] == 'remote frame'
-    assert page_graph_nodes[s[2]]['url'] == 'https://example.com/'
+    assert page_graph_nodes[s[2]]['url'] == 'https://whatwg.org/'
 
     # Check successors of |remote_iframe_node|.
     s = list(page_graph.successors(remote_iframe_node))
@@ -50,7 +50,7 @@ def test(page_graph, html, tab):
     assert page_graph_nodes[s[0]]['url'] == 'about:blank'
     # Check that we have the remote frame it gets when the static page loads.
     assert page_graph_nodes[s[1]]['node type'] == 'remote frame'
-    assert page_graph_nodes[s[1]]['url'] == 'https://example.com/'
+    assert page_graph_nodes[s[1]]['url'] == 'https://whatwg.org/'
     # Check that we have the DOM root it gets when the local page loads (after
     # swapping frame srcs).
     assert page_graph_nodes[s[2]]['node type'] == 'DOM root'
